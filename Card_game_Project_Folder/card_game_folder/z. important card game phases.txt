@@ -1,0 +1,28 @@
+title screen
+
+
+menu screen
+
+level select screen
+
+game screen -> casual, ranked, reverse, full or single
+
+profile
+
+chat screen?
+
+friends screen
+
+farm screen -> local territory farming, home, shops and shit
+
+trading -> trading screens
+
+crafting screen
+
+deck making -> abcd, collection
+
+casino select
+
+casino games -> poker game, blackjack game, roulette game
+
+settings screen
