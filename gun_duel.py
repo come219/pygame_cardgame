@@ -1,6 +1,7 @@
 import os
 import random
 import pygame
+import sys, subprocess
 
 ACTIONS = ["shoot", "reload", "block"]
 
@@ -18,7 +19,7 @@ BG_COLOR = (28, 30, 34)
 TEXT_COLOR = (240, 240, 240)
 FONT_SIZE = 28
 
-HAND_SIZE = 5
+HAND_SIZE = 7
 START_HEALTH = 3
 MAX_TURNS = 40
 
@@ -34,6 +35,9 @@ def draw_hand(deck, size=HAND_SIZE):
     for _ in range(min(size, len(deck))):
         hand.append(deck.pop())
     return hand
+
+def draw_deck(deck, size=HAND_SIZE):
+    return [deck.pop() for _ in range(min(size, len(deck)))]
 
 
 def refill_hands(deck, player_hand, cpu_hand, size=HAND_SIZE):
@@ -111,12 +115,14 @@ def draw_screen(
     winner,
 ):
     screen.fill(BG_COLOR)
-    draw_text(screen, "MAINMENU", 20, 20, font)
+    draw_text(screen, "ESC - MAINMENU", 20, 20, font)
     draw_text(screen, "Gun Duel - version 1.0", 420, 20, font)
     draw_text(screen, f"Turn {turn}", 20, 60, font)
-    draw_text(screen, f"Health: {p1_health} | Bullets: {p1_bullets} | Hand: {len(player_hand)} | Deck: {len(player_hand)}  ", 20, 680, font)
+    draw_text(screen, "TURN HISTORY", 1000, 20, font)
+    draw_text(screen, "HOW TO PLAY?", 1000, 60, font)
+    draw_text(screen, f"Player 1 | Health: {p1_health} | Bullets: {p1_bullets} | Hand: {len(player_hand)} | Deck: {len(player_hand)}  ", 20, 680, font)
     draw_text(screen, f"Player 1 played: {player_action or '...'}", 20, 270, font)
-    draw_text(screen, f"Player 2 Health: {p2_health} | Bullets: {p2_bullets} | Hand: {len(player_hand)}  | Deck: {len(player_hand)}  ", 20, 140, font)
+    draw_text(screen, f"Player 2 | Health: {p2_health} | Bullets: {p2_bullets} | Hand: {len(player_hand)}  | Deck: {len(player_hand)}  ", 20, 140, font)
     draw_text(screen, f"Player 2 played: {cpu_action or '...'}", 20, 200, font)
     draw_text(screen, message, 20, 580, font)
     if winner:
@@ -128,7 +134,7 @@ def draw_screen(
         pygame.draw.rect(screen, TEXT_COLOR, rect, 2)
         draw_text(screen, str(i + 1), rect.x + 4, rect.y + 4, font)
 
-    pygame.display.flip()
+    pygame.display.flip()    
 
 
 def pygame_main():
@@ -176,9 +182,16 @@ def pygame_main():
         )
 
         for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                pygame.quit()
+                subprocess.Popen(
+                    [sys.executable, os.path.join(os.path.dirname(__file__), "cardgame.py")]
+                )
+                return
             if event.type == pygame.QUIT:
                 pygame.quit()
                 return
+            
 
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 and not winner:
                 mx, my = event.pos

@@ -152,6 +152,14 @@ barbed_armour_img = pygame.image.load("assets/card_barbed_armour.png")
 card_back_image = pygame.image.load("assets/card_back.png")
 card_info_image = pygame.image.load("assets/card_info.png")
 
+card_aa_shoot_img = pygame.image.load("assets/card_aa_shoot.png")
+card_aa_reload_img = pygame.image.load("assets/card_aa_reload.png")
+card_aa_block_img = pygame.image.load("assets/card_aa_block.png")
+card_aa_cant_shoot_img = pygame.image.load("assets/card_aa_cant_shoot.png")
+card_aa_reflect_shot_img = pygame.image.load("assets/card_aa_reflect_shot.png")
+card_aa_extra_heart_img = pygame.image.load("assets/card_aa_extra_heart.png")
+card_aa_reset_players = pygame.image.load("assets/card_aa_reset_players.png")
+
 
 card_a_img = pygame.transform.scale(card_a_image, (150, 150))
 card_b_img = pygame.transform.scale(card_b_image, (150, 150))
@@ -251,10 +259,19 @@ burrow_img = pygame.transform.scale(burrow_img, (150, 150))
 stronghold_img = pygame.transform.scale(stronghold_img, (150, 150))
 
 
+aa_reload_img = pygame.transform.scale(card_aa_reload_img, (150, 150))
+aa_shoot_img = pygame.transform.scale(card_aa_shoot_img, (150, 150))
+aa_block_img = pygame.transform.scale(card_aa_block_img, (150, 150))
+aa_cant_shoot_img = pygame.transform.scale(card_aa_cant_shoot_img, (150, 150))
+aa_reflect_shot_img = pygame.transform.scale(card_aa_reflect_shot_img, (150, 150))
+aa_extra_heart_img = pygame.transform.scale(card_aa_extra_heart_img, (150, 150))
+aa_reset_players_img = pygame.transform.scale(card_aa_reset_players, (150, 150))
+
 card_back_img = pygame.transform.scale(card_back_image, (150, 150))
 
 # card info image
 card_info_img = pygame.transform.scale(card_info_image, (600, 800))
+
 
 
 
@@ -276,12 +293,16 @@ def display_text(text, color, x, y):
 CURRENT_PAGE = 0
 TOTAL_PAGES = 20
 
+
+
 image_cards =[
     rock_img, paper_img, scissors_img,
     card_info_img,card_info_img,card_info_img,card_info_img,card_info_img,card_info_img,
     card_info_img,card_info_img,card_info_img,card_info_img,card_info_img,card_info_img,
     card_info_img,card_info_img,card_info_img,card_info_img,card_info_img,card_info_img,
 ]
+
+
 
 cards = [card_rock_img, card_paper_img, card_scissors_img, card_snake_img, 
         card_human_img, card_dragon_img, card_wolf_img, card_devil_img, 
@@ -321,7 +342,38 @@ cards = [card_rock_img, card_paper_img, card_scissors_img, card_snake_img,
         card_back_img, card_back_img, card_back_img, card_back_img,
         card_back_img, card_back_img, card_back_img, card_back_img,
         card_back_img, card_back_img, card_back_img, card_back_img,
+        
+        
+        
+        
+        card_info_img,card_info_img,card_info_img,card_info_img,card_info_img,card_info_img,
+        
         ]
+
+
+minus_cards = [
+    aa_reload_img, aa_block_img, aa_shoot_img, aa_cant_shoot_img, aa_reflect_shot_img, aa_extra_heart_img,
+    aa_reset_players_img,
+    card_back_img,card_back_img,card_back_img, card_back_img, card_back_img, card_back_img, card_back_img,
+    card_back_img, card_back_img, card_back_img, card_back_img, card_back_img,
+]
+
+def _page_minus_1():
+        # row 0
+        screen.blit(minus_cards[0], (250, 150))
+        screen.blit(minus_cards[1], (450, 150))
+        screen.blit(minus_cards[2], (650, 150))
+        screen.blit(minus_cards[3], (850, 150))
+        # row 1
+        screen.blit(minus_cards[4], (450, 350))
+        screen.blit(minus_cards[5], (650, 350))
+        screen.blit(minus_cards[6], (850, 350))
+        screen.blit(minus_cards[7], (250, 350))
+        # row 2
+        screen.blit(minus_cards[8], (450, 550))
+        screen.blit(minus_cards[9], (650, 550))
+        screen.blit(minus_cards[10], (850, 550))
+        screen.blit(minus_cards[11], (250, 550))
 
 def _page_0():
         # row 0
@@ -455,6 +507,38 @@ def _page_7():
         screen.blit(cards[94], (650, 550))
         screen.blit(cards[95], (850, 550))
 
+def _page_8():
+        screen.blit(cards[96], (250, 150))
+        screen.blit(cards[97], (450, 150))
+        screen.blit(cards[98], (650, 150))
+        screen.blit(cards[99], (850, 150))
+        # row 1
+        screen.blit(cards[100], (250, 350))
+        screen.blit(cards[101], (450, 350))
+        screen.blit(cards[102], (650, 350))
+        screen.blit(cards[103], (850, 350))
+        # row 2
+        screen.blit(cards[104], (250, 550))
+        screen.blit(cards[105], (450, 550))
+        screen.blit(cards[106], (650, 550))
+        screen.blit(cards[107], (850, 550))
+
+def _page_9():
+        screen.blit(cards[108], (250, 150))
+        screen.blit(cards[109], (450, 150))
+        screen.blit(cards[110], (650, 150))
+        screen.blit(cards[111], (850, 150))
+        # row 1
+        screen.blit(cards[112], (250, 350))
+        screen.blit(cards[113], (450, 350))
+        screen.blit(cards[114], (650, 350))
+        screen.blit(cards[115], (850, 350))
+        # row 2
+        screen.blit(cards[116], (250, 550))
+        screen.blit(cards[117], (450, 550))
+        screen.blit(cards[118], (650, 550))
+        screen.blit(cards[119], (850, 550))
+
 b_selected = False
 num_selected = 0
 
@@ -490,6 +574,9 @@ def main():
         # Draw a grey rectangle menu bar at the top
         pygame.draw.rect(screen, DARK_GREY, (0, 0, WIDTH, 50))
         pygame.draw.rect(screen, DARK_GREY, (200, 100, WIDTH/2, 700))
+
+        if CURRENT_PAGE < 0:
+            _page_minus_1()
         
         if CURRENT_PAGE == 0:
             _page_0()
@@ -508,6 +595,10 @@ def main():
             _page_6()
         elif CURRENT_PAGE == 7:
             _page_7()
+        elif CURRENT_PAGE == 8:
+            _page_7()
+        elif CURRENT_PAGE == 9:
+            _page_7()
         
 
         display_text(f"Card Viewer", BLUE, 860, 4)
@@ -518,6 +609,11 @@ def main():
         # Draw a light grey box
         pygame.draw.rect(screen, LIGHT_GREY, (450, 850, 120, 80))
         pygame.draw.rect(screen, LIGHT_GREY, (850, 850, 120, 80))
+        display_text(f"D - Deck Manager", BLUE, 100, 810)
+        display_text(f"R - Reset Pages", BLUE, 100, 870)
+        display_text(f"C - Reset Card", BLUE, 100, 930)
+        display_text(f"# - View Card", BLUE, 100, 990)
+        
         display_text(f"<", BLUE, 500, 860)
         display_text(f">", BLUE, 900, 860)
         if b_selected == True:
@@ -535,6 +631,19 @@ def main():
                     if event.key == pygame.K_ESCAPE:
                         running = False
                         cardgame.main()
+
+                    if event.key == pygame.K_ESCAPE:
+                        running = False
+                        cardgame.main()
+                    
+                    if event.key == pygame.K_d:
+                        import deck_viewer
+                        running = False
+                        deck_viewer.main()
+                    
+                    if event.key == pygame.K_r:
+                        CURRENT_PAGE = 0
+
                     if event.key == pygame.K_LEFT:
                         CURRENT_PAGE -= 1
                         if CURRENT_PAGE > 0:

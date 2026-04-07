@@ -54,6 +54,10 @@ spock_round_2_player_Img = pygame.image.load('assets/spock_2_player_round_image.
 
 
 
+gun_duel_img = pygame.image.load('assets/gun_duel_image.png').convert()
+shoot_reload_repeat_img = pygame.image.load('assets/shoot_reload_repeat_image.png').convert()
+
+
 def storymodeicon(x, y):
     small_img = pygame.transform.scale(story_mode_img, (200, 350))  # Resize the image to 100x100
     screen.blit(small_img, (x, y))
@@ -152,6 +156,16 @@ def spockround_2_playericon(x, y):
     screen.blit(smaller_roundImg, (x, y))
 pass
 
+def gun_duel_icon(x, y):
+    smaller_roundImg = pygame.transform.scale(gun_duel_img, (200, 350))
+    screen.blit(smaller_roundImg, (x, y))
+pass
+
+def shoot_reload_repeat_icon(x, y): 
+    smaller_roundImg = pygame.transform.scale(shoot_reload_repeat_img, (200, 350))
+    screen.blit(smaller_roundImg, (x, y))
+pass
+
 ROW_0_HEIGHT = 230
 ROW_1_HEIGHT = 620
 
@@ -213,7 +227,8 @@ pass
 
 def _page_2():
     '''Game type selection menu function'''
-    
+    gun_duel_icon(120, 230)      # 
+    shoot_reload_repeat_icon(340, 230)  # 
         
 pass
 

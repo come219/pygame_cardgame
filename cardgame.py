@@ -361,10 +361,20 @@ pass
 
 
 
+##############################
+#   deck viewer function     #
+##############################
 
-#############################
-#   changeDeck function     #
-#############################
+def deck_viewer():
+    import deck_viewer
+    deck_viewer.main()  # Import the game module
+
+
+
+
+######################################
+#   changeDeck function (legacy)     #
+######################################
 
 #changedeck function boolean menu variables
 editdeckchange = False
@@ -373,7 +383,6 @@ clearselectdeckchange = False
 
 olddeck = []
 collection = ['Rock', 'Paper', 'Scissors']
-
 
 
 
@@ -603,8 +612,13 @@ def mainMenu():
 
                 
             if event.key == pygame.K_d:
-                print('change deck selection!')
+                print('deck management!')
                 gameMenu = 3
+
+            if event.key == pygame.K_0:
+                print('change deck selection!')
+                gameMenu = 9
+
 
             if event.key == pygame.K_g:
                 print('Enter game type selection!')
@@ -812,15 +826,21 @@ def learnMenu():
             if event.key == pygame.K_3:
                 b_learn_menu = True
                 num_learn_selection = 3
+            if event.key == pygame.K_0:
+                print('Viewing all cards')
+                import card_viewer
+                card_viewer.main()  # Import the game module
 
     #gameBackground fill
     gameDisplay.fill(black)
 
     # Display settings options
-    message_title("Learn Game", red)
+    message_title("Learn Game - How to Play", red)
 
     if b_learn_menu == False:
         message_to_screen2("Press ESC to return to Main Menu", newblue, 100, 200)
+
+
         message_to_screen2("1. Rock, Paper Scissors", newblue, 100, 300)
         message_to_screen2("2. Lizard, Spock", newblue, 100, 350)
         message_to_screen2("3. Extended", newblue, 100, 400)
@@ -829,6 +849,8 @@ def learnMenu():
         message_to_screen2("6. 1 Round Game", newblue, 100, 550)
         message_to_screen2("7. Auto CS Game", newblue, 100, 600)
         message_to_screen2("8. Captain's Mode Game", newblue, 100, 650)
+        message_to_screen2("9. Gun Duel Game", newblue, 100, 700)
+        message_to_screen2("0. View All Cards", newblue, 100, 850)
     else:
         message_to_screen2("Press C to clear selection", newblue, 100, 250)
         if num_learn_selection == 1:
@@ -840,8 +862,6 @@ def learnMenu():
         if num_learn_selection == 3:
             message_to_screen2("3. Extended", newblue, 100, 200)
             gameDisplay.blit(help_extended, [300, 300])
-
-    
 
     pass
 
@@ -951,12 +971,20 @@ def main():
                 mainMenu()          # Main menu function
             elif gameMenu == 2:
                 gametypeMenu()      # Game type selection function
+
             elif gameMenu == 3:
-                changeDeckMenu()    # deck management function
+                deck_viewer()    # Deck management function
+
             elif gameMenu == 4:
                 settingsMenu()      # Settings menu function
+            
+            elif gameMenu == 9:
+                changeDeckMenu()    # legacy deck management function
+            
             elif gameMenu == 0:     # learn game menu function
                 learnMenu() 
+
+        
 
                 
             ##GAME 1##
