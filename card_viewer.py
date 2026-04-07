@@ -97,6 +97,13 @@ card_fundamentals_only = pygame.image.load("assets/card_fundamentals_only.png") 
 card_non_core =  pygame.image.load("assets/card_non_core.png")   # non-core card - no rock, paper, scissors, and derivative cards
 card_stop_card_img = pygame.image.load("assets/card_stop_card.png")
 card_counter_stop_card_img = pygame.image.load("assets/card_counter_stop.png")
+card_reload_img = pygame.image.load("assets/card_reload.png")
+card_magical_mallet_img = pygame.image.load("assets/card_magical_mallet.png")
+card_toon_table_of_contents_img = pygame.image.load("assets/card_toon_table_of_contents.png")
+card_toon_bookmark_img = pygame.image.load("assets/card_toon_bookmark.png")
+card_toon_world_img = pygame.image.load("assets/card_toon_world.png")
+card_toon_kingdom_img = pygame.image.load("assets/card_toon_kingdom.png")
+card_jar_of_greed_img  = pygame.image.load("assets/card_jar_of_greed.png")
 
 blue_eyes_white_dragon_img = pygame.image.load("assets/card_blue_eyes_white_dragon.png")
 red_eyes_black_dragon_img = pygame.image.load("assets/card_red_eyes_black_dragon.png")
@@ -186,6 +193,13 @@ card_toon_water_img = pygame.transform.scale(card_toon_water_img, (150, 150))
 card_toon_earth_img = pygame.transform.scale(card_toon_earth_img, (150, 150))
 card_toon_dragon_img = pygame.transform.scale(card_toon_dragon_img, (150, 150))
 card_no_lose_img = pygame.transform.scale(card_no_lose_img, (150, 150))
+card_reload_img = pygame.transform.scale(card_reload_img, (150, 150))
+card_magical_mallet_img = pygame.transform.scale(card_magical_mallet_img, (150, 150))
+card_toon_bookmark_img = pygame.transform.scale(card_toon_bookmark_img, (150, 150))
+card_toon_table_of_contents_img = pygame.transform.scale(card_toon_table_of_contents_img, (150, 150))
+card_toon_world_img  = pygame.transform.scale(card_toon_world_img, (150, 150))
+card_toon_kingdom_img  = pygame.transform.scale(card_toon_kingdom_img, (150, 150))
+card_jar_of_greed_img = pygame.transform.scale(card_jar_of_greed_img, (150, 150))
 
 
 card_fundamentals_only = pygame.transform.scale(card_fundamentals_only, (150, 150))
@@ -280,6 +294,8 @@ cards = [card_rock_img, card_paper_img, card_scissors_img, card_snake_img,
         card_toon_gun_img, card_stop_card_img, card_counter_stop_card_img, 
         card_balance_img, card_void_img, card_no_lose_img, 
         card_fundamentals_only, card_non_core,
+        card_reload_img, card_magical_mallet_img, card_toon_table_of_contents_img, card_toon_bookmark_img,
+        card_toon_world_img, card_toon_kingdom_img, card_jar_of_greed_img,
         
         
         exodia_the_forbidden_one_img, pot_of_greed_img,

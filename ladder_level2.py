@@ -113,10 +113,9 @@ def main():
         display_text("Menu", GREY, 20, 4)
         pygame.draw.rect(screen, GREY, (WIDTH / 2 - 180, 150, 150, 150))
         display_text("Ladder Level 2: Lizard Spock Guy", WHITE, WIDTH/2, 4)
-        display_text('"Hey, I found this new way of playing!', WHITE, WIDTH/2, 150)
+        display_text('"Hey, I found this new way of playing! BO5?', WHITE, WIDTH/2, 150)
         display_text('Choose: Rock, Paper, Scissors, Lizard, Spock"', WHITE, WIDTH/2, 200)
         
-
         if b_player_win == True:
             display_text(f"{player_choice} beats {computer_choice}", GREEN, 50, 300)
             display_text(result, GREEN, 50, 350)
@@ -145,6 +144,10 @@ def main():
                     running = False
                     import cardgame  # Import the cardgame module
                     cardgame.main()
+                if event.key == pygame.K_n:
+                    running = False
+                    import ladder_level3  # Import the cardgame module
+                    ladder_level3.main()
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 x, y = event.pos

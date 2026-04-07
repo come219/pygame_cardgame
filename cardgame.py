@@ -25,6 +25,7 @@
 from pygame_functions import *
 
 import card_viewer
+import shop 
 
 
 
@@ -44,6 +45,7 @@ import card_viewer
 
 
 white = (255,255,255)
+dark_grey = (69,69,69)
 grey = (128,128,128)
 black = (0,0,0)
 red = (255,0,0)
@@ -118,6 +120,7 @@ pass
 #Loading in images into pygame variables
 mainMenuBackgroundImg = pygame.image.load('assets/mainmenubackground.png').convert()
 mainmenubarImg = pygame.image.load('assets/mainmenubar.png').convert()
+shop_button_image = pygame.image.load('assets/shop_button.png').convert()
 logo_game_image = pygame.image.load('assets/logo_game_logo_512.png').convert()
 logo_game_img = pygame.transform.scale(logo_game_image, (200, 200))
 logo_game_img_small = pygame.transform.scale(logo_game_image, (80, 80))
@@ -135,6 +138,7 @@ cancel_buttonImg = pygame.image.load("assets/button_cancel.png").convert()
 cancel_buttonImg = pygame.transform.scale(cancel_buttonImg, (300, 120))
 quitgamebuttonImg = pygame.image.load("assets/button_quit_game.png").convert()
 quitgamebutton_scaled = pygame.transform.scale(quitgamebuttonImg, (300, 120))
+shop_button_image_scaled = pygame.transform.scale(shop_button_image, (120, 120))
 
 x_button_scaled = pygame.transform.scale(x_buttonImg, (120, 80))
 gobackbuttonImg = pygame.image.load("assets/button_go_back.png").convert()
@@ -273,21 +277,21 @@ collectioncardpos =  [(100,800), (250,800), (400,800), (550,800),(700,800), (850
 
 
 def drawCards(card, cardpos):
-
     if(card == 'a'):
-        
         gameDisplay.blit(cardaImg, cardpos)
-        
     elif(card == 'b'):
-        
         gameDisplay.blit(cardbImg, cardpos)
-        
     elif(card == 'c'):
-        
         gameDisplay.blit(cardcImg, cardpos)
+pass
 
-
-
+def draw_cards(card, cardpos):
+    if(card == 'Rock'):
+        gameDisplay.blit(cardaImg, cardpos)
+    elif(card == 'Paper'):
+        gameDisplay.blit(cardbImg, cardpos)
+    elif(card == 'Scissors'):
+        gameDisplay.blit(cardcImg, cardpos)
 pass
 
 
@@ -368,7 +372,7 @@ noteditingdeckchange = False
 clearselectdeckchange = False
 
 olddeck = []
-
+collection = ['Rock', 'Paper', 'Scissors']
 
 
 
@@ -427,14 +431,7 @@ def changeDeckMenu():
                     #undo previous action    --> which requires to save the action made --> save old sizeofdeck into an array that it may refer back to
                     sizeofdeck = olddeck[0]
                     print('cancel edit!')
-
-
-
-                
-        
-
-            #initate Editing or quit editing
-                    
+            # initate Editing or quit editing
             if event.key == pygame.K_ESCAPE:
 
                 #are u sure u want to quit / save
@@ -499,14 +496,23 @@ def changeDeckMenu():
 
     #mainmenu background
     changedeckbackground(0, 0)
+    message_to_screen2("Deck Management", dark_grey, WIDTH / 2 - 50, 4)
+    message_to_screen2("Menu", dark_grey, 20, 4)
+    message_to_screen2("Press V to view all the cards", dark_grey, 1400, 4)
+    num_collection_size = len(collection)
+    message_to_screen2("Collection: {num_collection_size}", dark_grey, WIDTH/ 150, 650)
+    message_to_screen2("Page 0 / 20", dark_grey, WIDTH/2 - 50, 650)
+    message_to_screen2("<", dark_grey, WIDTH/2 - 100, 650)
+    message_to_screen2(">", dark_grey, WIDTH/2 + 150, 650)
 
     # Display a text menu on the top right
-    message_to_screen2("Press ESC to return", newblue, 1400, 250)
+    message_to_screen2("Press ESC to return", newblue, 1400, 180)
+    message_to_screen2("Press T to test hand", newblue, 1400, 250)
     message_to_screen2("Press E to edit deck", newblue, 1400, 300)
     message_to_screen2("Press S to save deck", newblue, 1400, 350)
     message_to_screen2("Press C to clear deck", newblue, 1400, 400)
     message_to_screen2("Press Z to undo changes", newblue, 1400, 450)
-    message_to_screen2("Press V to view all the cards", newblue, 1400, 500)
+    
 
 
 
@@ -516,32 +522,46 @@ def changeDeckMenu():
         p = changedeckcardpos[i]
         drawCards(d,p)
         #print(d)
-
-
-    #draw cards in the collection
     
-
+    #draw cards in the collection
+    for i, d in enumerate(collection):
+        collection_card = collectioncardpos[i]
+        
+        draw_cards(d,collection_card)
+        message_to_screen2("x 1", red, collectioncardpos[i][0], collectioncardpos[i][1] - 50 )
 
 
     if(editdeckchange) == True:
-        message_to_screen2("Editing Deck:", newblue, 1400, 500)
+        message_to_screen2("Editing Deck:", white, 1400, 500)
 
     if(noteditingdeckchange) == True:
-        message_to_screen2("Saved Deck Edit!", newblue, 1400, 500)
+        message_to_screen2("Saved Deck Edit!", white, 1400, 500)
         
     if(clearselectdeckchange) == True:
-        message_to_screen2("Cleared Deck!", newblue, 1650, 500)
+        message_to_screen2("Cleared Deck!", white, 1650, 500)
         
     
 
     #print(sizeofdeck)
+    screen_text = font.render(sizeofdeck, True, red)
+    gameDisplay.blit(screen_text, [WIDTH/2, 50])
+    val_deck_size = len(sizeofdeck)
+    s_deck_size = str(val_deck_size)
+    deck_size_text = font.render("Deck: {s_deck_size}", True, red)
+    gameDisplay.blit(deck_size_text, [100, 50])
 
-    message_to_screen(sizeofdeck, red)
+    deck1_text = font.render("deck 1", True, black)
+    deck2_text = font.render("deck 2", True, black)
+    deck3_text = font.render("deck 3", True, black)
+    deck4_text = font.render("deck 4", True, black)
+    gameDisplay.blit(deck1_text, [1400, 50])
+    gameDisplay.blit(deck2_text, [1530, 50])
+    gameDisplay.blit(deck3_text, [1680, 50])
+    gameDisplay.blit(deck4_text, [1830, 50])
+    # message_to_screen(sizeofdeck, red)
     #message_to_screen(currentdecktext, red)
     
     #message_to_screen(newdeck, red)
-
-
 pass
 
 global b_quit_button
@@ -567,7 +587,6 @@ def mainMenu():
                     quitgame()
                 b_quit_button = True
                 
-
             if event.key == pygame.K_ESCAPE:
                 #are u sure prompt then quit
                 print('QUIT: by escape!')
@@ -578,6 +597,10 @@ def mainMenu():
             if event.key == pygame.K_c:
                 print('cancel quit')
                 b_quit_button = False
+
+            if event.key == pygame.K_b:
+                shop.main()
+
                 
             if event.key == pygame.K_d:
                 print('change deck selection!')
@@ -603,7 +626,7 @@ def mainMenu():
     drawImage(mainMenuBackgroundImg, 0, 0)
 
     message_title("Balanced Card Game", salmon)   
-    
+    gameDisplay.blit(shop_button_image_scaled, (170, HEIGHT - 170))
     pygame.draw.rect(gameDisplay, grey, (350, HEIGHT - 150, 80, 80))
     message_to_screen2("Player: _", pink, 450, HEIGHT - 150)
     message_to_screen2("Balance: \$0", green, 450, HEIGHT - 100)
@@ -663,27 +686,51 @@ def gametypeMenu():
                 print('Starting opening all gamemodes game types')
                 import game_type
                 game_type.main()
-            if event.key == pygame.K_0:
-                print('Starting 1 round game')
+            if event.key == pygame.K_1:
+                print('Starting ladder level 1')
                 import ladder_level1  # Import the game module
                 ladder_level1.main()
-            if event.key == pygame.K_1:
+            if event.key == pygame.K_2:
                 print('Starting 1 round game')
                 import game  # Import the game module
                 game.main()
-            if event.key == pygame.K_2:
-                print('Starting full game')
-                import rock_paper_scissors  # Import the game module
-                rock_paper_scissors.main()  # Call the start_full_game function from game.py
             if event.key == pygame.K_3:
-                print('Starting extended menu')
-                import extended_game  # Import the game module
-                extended_game.main()  # Call the start_full_game function from game.py
+                print('Starting full traditional game')
+                import traditional_game
+                traditional_game.main()
             if event.key == pygame.K_4:
                 print('Starting online menu')
                 import online_mode
                 online_mode.main()  # Import the game module
                 # onlineMenu()
+            
+            # 5 - test
+            # 6 - dice roll
+
+            if event.key == pygame.K_7:
+                print('Starting classic game')
+                import rock_paper_scissors  # Import the game module
+                rock_paper_scissors.main()
+
+            # 8 <- 9 - lizard spock
+            if event.key == pygame.K_8:
+                print('Starting lizard spock menu')
+                import lizard_spock  # Import the game module
+                lizard_spock.main()
+
+            # 9 <- 11 - extended
+            if event.key == pygame.K_9:
+                print('Starting extended menu')
+                import extended_game  # Import the game module
+                extended_game.main()
+
+            # 0 - snake
+            if event.key == pygame.K_0:
+                print('Starting extended menu')
+                import snake  # Import the game module
+                snake.main()
+
+            # 12 - 
 
     #gameBackground fill
     gameDisplay.fill(black)
@@ -798,11 +845,12 @@ def learnMenu():
 
     pass
 
-global b_toggle_game_setting
+global b_toggle_game_setting, b_toggle_fullscreen_setting
 b_toggle_game_setting = False
+b_toggle_fullscreen_setting = False
 def settingsMenu():
     '''Settings menu function'''
-    global gameMenu, b_toggle_game_setting
+    global gameMenu, b_toggle_game_setting, b_toggle_fullscreen_setting
     b_toggle_game_setting = False
     #!event check
     for event in pygame.event.get():
@@ -816,6 +864,17 @@ def settingsMenu():
             if event.key == pygame.K_g:
                 print('toggle game setting')
                 b_toggle_game_setting = not b_toggle_game_setting
+            if event.key == pygame.K_f:
+                print('toggle fullscreen')
+                pygame.display.toggle_fullscreen()
+                b_toggle_fullscreen_setting = not b_toggle_fullscreen_setting
+            if event.key == pygame.K_LEFT:
+                print('decrease vol') 
+            if event.key == pygame.K_RIGHT:
+                print('increase vol') 
+            if event.key == pygame.K_RIGHT:
+                print('mute/unmute vol')
+                
 
     #gameBackground fill
     gameDisplay.fill(black)
@@ -827,7 +886,8 @@ def settingsMenu():
     message_to_screen2("< - Decrease volume", newblue, 100, 550)  # ▲ - &#9650; - \u25B2
     message_to_screen2("> - Increase volume", newblue, 100, 600)  # ▼ - &#9660; - \u25BC
     message_to_screen2("M - Mute Volume: True", newblue, 100, 650)
-    message_to_screen2("F - Toggle Fullscreen: True", newblue, 100, 700)
+    s_toggle_fullscreen_setting = str(b_toggle_fullscreen_setting)
+    message_to_screen2("F - Toggle Fullscreen: {s_toggle_fullscreen_setting}", newblue, 100, 700)
     message_to_screen2("G - Game Setting: {b_toggle_game_setting}", newblue, 100, 750)
 
     

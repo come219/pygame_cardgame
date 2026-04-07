@@ -1,0 +1,6 @@
+# Balanced Card Game
+# requirements.txt
+
+pygame
+
+# pyinstaller

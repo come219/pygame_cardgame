@@ -85,7 +85,7 @@ def main():
 
         display_text("Menu", GREY, 20, 4)
         pygame.draw.rect(screen, GREY, (WIDTH / 2 - 180, 150, 150, 150))
-        display_text("Ladder Level 1: Rock, Paper, or Scissors Guy", GREY, WIDTH /2 - 200, 4)
+        display_text("Ladder Level 1: Rock, Paper, or Scissors Boy", GREY, WIDTH /2 - 200, 4)
         display_text('"Best of 3? Good luck!', WHITE, WIDTH /2, 200)
 
         if rand_bool1 == True:
@@ -119,6 +119,11 @@ def main():
                     running = False
                     import cardgame  # Import the cardgame module
                     cardgame.main()
+                if event.key == pygame.K_n:
+                    running = False
+                    import ladder_level2  # Import the cardgame module
+                    ladder_level2.main()
+                
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 x, y = event.pos
