@@ -12,7 +12,7 @@ ACTION_IMAGES = {
     "block": "card_aa_block.png",
     "back": "card_aa_back.png",
 }
-SCREEN_SIZE = (1280, 720)
+SCREEN_SIZE = (1920, 1080) # 1280x720
 CARD_SIZE = (140, 200)
 CARD_Y = 360
 BG_COLOR = (28, 30, 34)
@@ -99,6 +99,49 @@ def draw_text(surface, text, x, y, font, color=TEXT_COLOR):
     surface.blit(font.render(text, True, color), (x, y))
 
 
+def draw_gun_duel_settings_dialog(screen, font):
+    STARTING_PLAYER_HEALTH = 1
+    MAX_STARTING_PLAYER_HEALTH = 10
+    STARTING_BULLETS = 0
+    MAX_STARTING_BULLETS = 3
+    STARTING_HAND = 7
+    MAX_STARTING_HAND = 7
+    STARTING_PERK = False
+    SHOPPING_PHASE = False
+    CLASSIC_MODE = True
+
+    clock = pygame.time.Clock()
+
+    while True:
+        screen.fill(BG_COLOR)
+        draw_text(screen, "Gun Duel - Game Settings", 20, 20, font)
+        draw_text(screen, "ESC - Close Settings", 20, 60, font)
+        draw_text(screen, f"1. STARTING HP = {STARTING_PLAYER_HEALTH}", 20, 120, font)
+        draw_text(screen, f"2. STARTING BULLETS = {STARTING_BULLETS}", 20, 180, font)
+        draw_text(screen, f"3. STARTING HAND = {STARTING_HAND}", 20, 240, font)
+        draw_text(screen, f"4. STARTING PERK = {'TRUE' if STARTING_PERK else 'FALSE'}", 20, 300, font)
+        draw_text(screen, f"5. SHOPPING PHASE = {'ON' if SHOPPING_PHASE else 'OFF'}", 20, 360, font)
+        draw_text(screen, f"6. CLASSIC MODE = {'ON' if CLASSIC_MODE else 'OFF'}", 20, 420, font)
+        
+        
+        draw_text(screen, f"(MAX STARTING HP: {MAX_STARTING_PLAYER_HEALTH})", 40, 550, font)
+        draw_text(screen, f"(MAX STARTING BULLETS: {MAX_STARTING_BULLETS})", 40, 610, font)
+        draw_text(screen, f"(MAX STARTING HAND: {MAX_STARTING_HAND})", 40, 670, font)
+
+        pygame.display.flip()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                return
+
+        clock.tick(30)
+
+
+
+
 def draw_screen(
     screen,
     font,
@@ -120,6 +163,7 @@ def draw_screen(
     draw_text(screen, f"Turn {turn}", 20, 60, font)
     draw_text(screen, "TURN HISTORY", 1000, 20, font)
     draw_text(screen, "HOW TO PLAY?", 1000, 60, font)
+    draw_text(screen, "GAME SETTINGS", 1000, 100, font)
     draw_text(screen, f"Player 1 | Health: {p1_health} | Bullets: {p1_bullets} | Hand: {len(player_hand)} | Deck: {len(player_hand)}  ", 20, 680, font)
     draw_text(screen, f"Player 1 played: {player_action or '...'}", 20, 270, font)
     draw_text(screen, f"Player 2 | Health: {p2_health} | Bullets: {p2_bullets} | Hand: {len(player_hand)}  | Deck: {len(player_hand)}  ", 20, 140, font)
@@ -183,6 +227,10 @@ def pygame_main():
 
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                import cardgame
+                cardgame.main()
+
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_q:    
                 pygame.quit()
                 subprocess.Popen(
                     [sys.executable, os.path.join(os.path.dirname(__file__), "cardgame.py")]
@@ -192,6 +240,8 @@ def pygame_main():
                 pygame.quit()
                 return
             
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_s:
+                draw_gun_duel_settings_dialog(screen, font)
 
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 and not winner:
                 mx, my = event.pos

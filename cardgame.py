@@ -700,6 +700,7 @@ def gametypeMenu():
                 print('Starting opening all gamemodes game types')
                 import game_type
                 game_type.main()
+            
             if event.key == pygame.K_1:
                 print('Starting ladder level 1')
                 import ladder_level1  # Import the game module
@@ -745,6 +746,8 @@ def gametypeMenu():
                 snake.main()
 
             # 12 - 
+
+
 
     #gameBackground fill
     gameDisplay.fill(black)
@@ -800,6 +803,7 @@ def learnMenu():
     global gameMenu
     global b_learn_menu
     global num_learn_selection
+    help_page = 0
 
     help_lizared_spock = pygame.image.load('assets/help_lizard_spock.png').convert()
     help_classic = pygame.image.load('assets/help_classic.png').convert()
@@ -814,6 +818,19 @@ def learnMenu():
             if event.key == pygame.K_ESCAPE:
                 print('Return to mainmenu!')
                 gameMenu = 1
+            
+            if event.key == pygame.K_LEFT:
+                print('Previous page')
+                help_page -= 1
+                if help_page < 1:
+                    help_page = 3
+                
+            if event.key == pygame.K_RIGHT:
+                print('Next page')
+                help_page += 1
+                if help_page > 3:
+                    help_page = 1
+
             if event.key == pygame.K_c:
                 b_learn_menu = False
                 num_learn_selection = 0
@@ -837,8 +854,12 @@ def learnMenu():
     # Display settings options
     message_title("Learn Game - How to Play", red)
 
+    
+
     if b_learn_menu == False:
-        message_to_screen2("Press ESC to return to Main Menu", newblue, 100, 200)
+        message_to_screen2("Press ESC to return to Main Menu", newblue, 100, 150)
+        message_to_screen2(f"Page  {help_page} / 3", newblue, 100, 200)
+
 
 
         message_to_screen2("1. Rock, Paper Scissors", newblue, 100, 300)
@@ -850,7 +871,11 @@ def learnMenu():
         message_to_screen2("7. Auto CS Game", newblue, 100, 600)
         message_to_screen2("8. Captain's Mode Game", newblue, 100, 650)
         message_to_screen2("9. Gun Duel Game", newblue, 100, 700)
-        message_to_screen2("0. View All Cards", newblue, 100, 850)
+        message_to_screen2("10. MOBA Board Game", newblue, 100, 750)
+        message_to_screen2("11. MOBA Chess", newblue, 100, 800)
+
+
+        message_to_screen2("0. View All Cards", newblue, 100, 950)
     else:
         message_to_screen2("Press C to clear selection", newblue, 100, 250)
         if num_learn_selection == 1:

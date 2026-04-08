@@ -296,16 +296,32 @@ def main():
                 if event.key == pygame.K_RIGHT:
                     print('Next page')
                     CURRENT_PAGE = CURRENT_PAGE + 1
-                if event.key == pygame.K_1:
-                    print('Starting 1 round game')
-                    import game  # Import the game module
-                    game.main()
-                if event.key == pygame.K_2:
-                    print('Starting full game')
-                    import rock_paper_scissors  # Import the game module
-                    rock_paper_scissors.main()  # Call the start_full_game function from game.py
-                if event.key == pygame.K_3:
-                    print('Starting online menu')
+
+                if CURRENT_PAGE == 0:
+                    if event.key == pygame.K_1:
+                        print('Starting 1 round game')
+                        import game  # Import the game module
+                        game.main()
+                    if event.key == pygame.K_2:
+                        print('Starting full game')
+                        import rock_paper_scissors  # Import the game module
+                        rock_paper_scissors.main()  # Call the start_full_game function from game.py
+                    if event.key == pygame.K_3:
+                        print('Starting online menu')
+                
+                elif CURRENT_PAGE == 2:
+                    if event.key == pygame.K_1:
+                        print('Starting gun duel')
+                        import gun_duel  # Import the game module
+                        gun_duel.pygame_main()  # Call the start_full_game function from game.py
+                    if event.key == pygame.K_2:
+                        print('Starting shoot reload repeat')
+                        # import shoot_reload_repeat  # Import the game module
+                        # shoot_reload_repeat.pygame_main()  # Call the start_full_game function from game.py
+            
+
+
+
 
 
         pygame.display.flip()

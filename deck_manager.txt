@@ -1,0 +1,9 @@
+[Deck A]
+  Rock x1
+
+[Deck B]
+  Paper x2
+  Scissors x2
+
+[Deck C]
+  (empty)
