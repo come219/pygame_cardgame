@@ -51,9 +51,11 @@ black = (0,0,0)
 red = (255,0,0)
 salmon = (250,128,114)
 pink = (255,20,147)
+dark_pink =  (105,20,50) 
 green = (100, 255, 100)
 teal = (0, 128, 128)
 newblue = (86,86,239)
+dark_newblue = (69, 69, 219)
 
 
 
@@ -87,6 +89,7 @@ clock = pygame.time.Clock()
 font = pygame.font.SysFont(None, 25)
 font2 = pygame.font.SysFont(None, 50)
 font3 = pygame.font.SysFont(None, 70)
+small_font = pygame.font.SysFont(None, 22)
 
 #################################
 #   message-to-screen functions #
@@ -103,6 +106,9 @@ def message_to_screen2(msg, color, x, y):
 
 pass
 
+def message_to_screen_small(msg, color, x, y):
+    screen_text = small_font.render(msg, True, color)
+    gameDisplay.blit(screen_text, [x, y])
 
 def message_title(msg, color):
     screen_text = font3.render(msg, True, color)
@@ -120,7 +126,7 @@ pass
 #Loading in images into pygame variables
 mainMenuBackgroundImg = pygame.image.load('assets/mainmenubackground.png').convert()
 mainmenubarImg = pygame.image.load('assets/mainmenubar.png').convert()
-shop_button_image = pygame.image.load('assets/shop_button.png').convert()
+shop_button_icon = pygame.image.load('assets/shop_icon.png').convert()
 logo_game_image = pygame.image.load('assets/logo_game_logo_512.png').convert()
 logo_game_img = pygame.transform.scale(logo_game_image, (200, 200))
 logo_game_img_small = pygame.transform.scale(logo_game_image, (80, 80))
@@ -131,14 +137,30 @@ logo_company_img_small = pygame.transform.scale(logo_company_image, (80, 80))
 # menu buttons
 playgamebuttonImg = pygame.image.load("assets/button_play_game.png").convert()
 changedeckbuttonImg = pygame.image.load("assets/button_change_deck.png").convert()
+deck_manager_image = pygame.image.load("assets/button_deck_manager.png").convert()
+deck_simulator_button_image = pygame.image.load("assets/button_deck_simulator.png").convert()
+view_cards_button_Img = pygame.image.load("assets/button_view_cards.png").convert()
 learnImg = pygame.image.load("assets/button_learn.png").convert()
 settingsbuttonImg = pygame.image.load("assets/button_settings.png").convert()
+base_button_image = pygame.image.load("assets/button_base.png").convert()
+shop_button_image = pygame.image.load("assets/button_shop.png").convert()
+
+base_button_image_scaled = pygame.transform.scale(base_button_image, (300, 300))
+play_game_button_scaled = pygame.transform.scale(playgamebuttonImg, (300, 120))
+change_deck_button_scaled = pygame.transform.scale(changedeckbuttonImg, (300, 120))
+deck_simulator_button_scaled = pygame.transform.scale(deck_simulator_button_image, (300, 120))
+
+deck_manager_scaled = pygame.transform.scale(deck_manager_image, (300, 120))
+view_cards_button_scaled = pygame.transform.scale(view_cards_button_Img, (300, 120))
+learn_button_scaled = pygame.transform.scale(learnImg, (100, 100))
+settings_button_scaled = pygame.transform.scale(settingsbuttonImg, (220, 100))
+
 x_buttonImg = pygame.image.load("assets/button_x.png").convert()
 cancel_buttonImg = pygame.image.load("assets/button_cancel.png").convert()
 cancel_buttonImg = pygame.transform.scale(cancel_buttonImg, (300, 120))
 quitgamebuttonImg = pygame.image.load("assets/button_quit_game.png").convert()
 quitgamebutton_scaled = pygame.transform.scale(quitgamebuttonImg, (300, 120))
-shop_button_image_scaled = pygame.transform.scale(shop_button_image, (120, 120))
+shop_button_image_scaled = pygame.transform.scale(shop_button_image, (300, 120))
 
 x_button_scaled = pygame.transform.scale(x_buttonImg, (120, 80))
 gobackbuttonImg = pygame.image.load("assets/button_go_back.png").convert()
@@ -362,6 +384,15 @@ pass
 
 
 ##############################
+#   card viewer function     #
+##############################
+
+def card_viewer():
+    import card_viewer
+    card_viewer.main()  # Import the game module
+
+
+##############################
 #   deck viewer function     #
 ##############################
 
@@ -576,11 +607,15 @@ pass
 global b_quit_button
 b_quit_button = False
 
+global selected_deck
+selected_deck = 1
+
 #########################
 #   mainMenu function   #
 #########################
 def mainMenu():
-    global gameMenu, b_quit_button
+    global gameMenu, b_quit_button, selected_deck
+    
     #!event check
     for event in pygame.event.get():         
         
@@ -595,7 +630,8 @@ def mainMenu():
                 if b_quit_button == True:
                     quitgame()
                 b_quit_button = True
-                
+
+
             if event.key == pygame.K_ESCAPE:
                 #are u sure prompt then quit
                 print('QUIT: by escape!')
@@ -604,7 +640,10 @@ def mainMenu():
                 b_quit_button = True
 
             if event.key == pygame.K_c:
-                print('cancel quit')
+                print('cancel quit + toggle change deck')
+                selected_deck = selected_deck + 1
+                if selected_deck > 3:
+                    selected_deck = 1
                 b_quit_button = False
 
             if event.key == pygame.K_b:
@@ -614,6 +653,10 @@ def mainMenu():
             if event.key == pygame.K_d:
                 print('deck management!')
                 gameMenu = 3
+            
+            if event.key == pygame.K_v:
+                print('card viewer')
+                gameMenu = 8
 
             if event.key == pygame.K_0:
                 print('change deck selection!')
@@ -639,33 +682,57 @@ def mainMenu():
     #mainmenu background
     drawImage(mainMenuBackgroundImg, 0, 0)
 
-    message_title("Balanced Card Game", salmon)   
-    gameDisplay.blit(shop_button_image_scaled, (170, HEIGHT - 170))
-    pygame.draw.rect(gameDisplay, grey, (350, HEIGHT - 150, 80, 80))
-    message_to_screen2("Player: _", pink, 450, HEIGHT - 150)
-    message_to_screen2("Balance: \$0", green, 450, HEIGHT - 100)
-
     #mainmenu bar // # 1060, 20
     drawImage(mainmenubarImg,       860, 400)
-    drawImage(playgamebuttonImg,    910, 380)
-    drawImage(changedeckbuttonImg,  910, 520)
-    drawImage(learnImg,  910, 660)
-    drawImage(settingsbuttonImg,    910, 800)
-    drawImage(logo_game_img,    WIDTH/1.4 - 200, 150)
+
+    # buttons
+    drawImage(base_button_image_scaled,    420, 420)
+    message_to_screen2("Player:", grey, 420, 460)
+    message_to_screen2("Not Connected ...", grey, 420, 540)
+    message_to_screen2("(status: 0)", grey, 420, 600)
+
+    # buttons, ordered
+    drawImage(deck_simulator_button_scaled,  910, 420)
+    drawImage(deck_manager_scaled,  910, 550)
+
+    if selected_deck == 1:
+        message_to_screen2("DECK: A", salmon, 980, 840)
+    elif selected_deck == 2:
+        message_to_screen2("DECK: B", salmon, 980, 840)
+    elif selected_deck == 3:
+        message_to_screen2("DECK: C", salmon, 980, 840)
     
-
-
+    drawImage(play_game_button_scaled,    1360, 420)
+    drawImage(change_deck_button_scaled,  910, 690)
+    drawImage(view_cards_button_scaled,  1360, 550)
+    drawImage(shop_button_image_scaled,  1360, 690)
+    message_to_screen2("Balance: $0.00", green, 1360, 840)
+    
+    
+    
+    drawImage(settings_button_scaled,   340, 200)
+    drawImage(learn_button_scaled,  600, 200)
     gameDisplay.blit(x_button_scaled,( WIDTH -300, 100))
     if b_quit_button == True:
         gameDisplay.blit(quitgamebutton_scaled,( WIDTH -400, 100))
         gameDisplay.blit(cancel_buttonImg,( WIDTH -800, 100))
 
     #display commands to select menu
-    message_to_screen2("219 Studios", newblue, 100, 160)
-    message_to_screen2("Version 0.3", newblue, 100, 200)
-    message_to_screen2("Not Connected ...", newblue, 100, 260)
-    if False:
-        message_to_screen2("Connected", newblue, 100, 260)
+    drawImage(logo_game_img,    100, 100)
+
+    message_to_screen_small("BALANCED CARD GAME", salmon, 340, 110)
+    message_to_screen_small("219 Studios", newblue, 340, 140)
+    message_to_screen_small("Version 0.4.2", grey, 340, 170)
+
+
+    pygame.draw.rect(gameDisplay, grey, (150, HEIGHT - 150, 80, 80))
+    message_to_screen2("Player: _", pink, 250, HEIGHT - 150)
+    message_to_screen2("W/L: 0/0", dark_pink, 250, HEIGHT - 100)
+
+    
+    
+
+    
     
 pass          
 
@@ -1003,8 +1070,13 @@ def main():
             elif gameMenu == 4:
                 settingsMenu()      # Settings menu function
             
+            elif gameMenu == 8: 
+                card_viewer()    # Card viewer function
+
             elif gameMenu == 9:
                 changeDeckMenu()    # legacy deck management function
+
+          
             
             elif gameMenu == 0:     # learn game menu function
                 learnMenu() 
