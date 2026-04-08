@@ -39,7 +39,6 @@ PURPLE         = (145,  90, 220)
 OVERLAY        = (8,   10,  16, 225)
 
 CARD_W, CARD_H   = 108, 148
-PREVIEW_W        = 200   # card preview panel width
 MAX_DECK         = 30
 STATUS_DUR       = 150
 
@@ -61,26 +60,23 @@ DECK_Y       = DECK_LABEL_Y + 22
 COLL_LABEL_Y = 590
 COLL_Y       = COLL_LABEL_Y + 22
 
-# preview strip on the left edge
-PREV_X       = SIDEBAR_X + 8
-PREV_Y       = 70
-
-DECK_PANEL_W = SIDEBAR_X - PAD * 2 - PREVIEW_W - PAD
+# No more left preview panel — grid starts at left edge
+DECK_PANEL_W = SIDEBAR_X - PAD * 2
 COLL_PANEL_W = DECK_PANEL_W
 
 # columns available for cards
-CARD_COLS    = 8
+CARD_COLS    = 11
 CARD_CW      = CARD_W + 10
 CARD_CH      = CARD_H + 10
 
 # visible rows before scroll kicks in
-DECK_VIS_ROWS = 2          # 2 rows = 16 cards visible
+DECK_VIS_ROWS = 2          # 2 rows = cards visible
 COLL_VIS_ROWS = 2
 
 DECK_VIS_H   = DECK_VIS_ROWS * CARD_CH
 COLL_VIS_H   = COLL_VIS_ROWS * CARD_CH
 
-DECK_PANEL_X = PAD + PREVIEW_W + PAD
+DECK_PANEL_X = PAD
 COLL_PANEL_X = DECK_PANEL_X
 
 DECK_DEFS = [
@@ -90,8 +86,57 @@ DECK_DEFS = [
 ]
 
 # =====================
-# Expanded card pool
+# Expanded card pool with descriptions
 # =====================
+CARD_DESCRIPTIONS = {
+    # Elements
+    "Rock":          "The classic. Solid and dependable. Crushes through with brute force.",
+    "Paper":         "Covers Rock and disproves Spock. Deceptively powerful.",
+    "Scissors":      "Sharp and precise. Cuts through Paper with ease.",
+    "Fire":          "Primal flame that consumes all. Burns through defenses.",
+    "Water":         "The great equalizer. Extinguishes fire and erodes stone.",
+    "Wind":          "Invisible force of nature. Carries storms and fuels flames.",
+    "Earth":         "Solid and unyielding. The foundation upon which all is built.",
+    "Lightning":     "Raw electrical energy. Strikes fast and devastates.",
+    "Ice":           "Frozen power that slows and shatters. Chilling precision.",
+    "Shadow":        "Darkness incarnate. Strikes from where you least expect.",
+    "Light":         "Radiant energy that pierces darkness. Purifies and reveals.",
+    "Void":          "The absence of everything. Consumes matter and energy alike.",
+    # Units
+    "Knight":        "Mounted warrior with lance and honor. Charges through enemy lines.",
+    "Archer":        "Ranged combatant with deadly aim. Picks off threats from afar.",
+    "Mage":          "Channels arcane magic. Versatile and unpredictable in combat.",
+    "Dragon":        "A mighty beast of fire and fury. Dominates the skies.",
+    "Goblin":        "Small but cunning. Overwhelms foes with numbers and tricks.",
+    "Shield":        "Pure defense. Absorbs damage and protects allies.",
+    "Rogue":         "Strikes from the shadows. Quick, silent, and deadly.",
+    "Paladin":       "Holy warrior combining faith and steel. Heals and fights.",
+    "Necromancer":   "Raises the dead to fight. Dark magic at its finest.",
+    "Berserker":     "Uncontrollable rage fuels devastating attacks. All offense.",
+    "Ranger":        "Master of the wilderness. Tracks and ambushes with precision.",
+    "Druid":         "Nature's champion. Shapeshifts and commands the wild.",
+    # Suited
+    "Ace of Spades":      "The highest card. A symbol of power and finality.",
+    "King of Hearts":     "The benevolent ruler. Strong leadership on the field.",
+    "Queen of Diamonds":  "Elegant and sharp. Wealth becomes a weapon.",
+    "Jack of Clubs":      "The resourceful knave. Tricks and cunning in play.",
+    "Ten of Spades":      "A solid foundation. Reliable and consistent.",
+    "Nine of Hearts":     "The wish card. Brings hope and unexpected turns.",
+    "Eight of Diamonds":  "Steady and balanced. A dependable mid-range card.",
+    "Seven of Clubs":     "Lucky number seven. Fortune favors the bold.",
+    # Spells
+    "Fireball":      "A blazing sphere of destruction. Deals massive area damage.",
+    "Blizzard":      "A freezing storm that slows and damages all enemies.",
+    "Thunderstrike": "A bolt from above. Precise and devastating single-target.",
+    "Heal":          "Restores health to an ally. Essential for survival.",
+    "Barrier":       "Creates a protective shield. Blocks incoming damage.",
+    "Summon":        "Calls forth a creature to aid in battle.",
+    "Curse":         "Weakens an enemy with dark magic. Reduces their power.",
+    "Bless":         "Empowers an ally with divine energy. Boosts their strength.",
+    "Teleport":      "Instantly moves a unit to a new position. Tactical repositioning.",
+    "Drain":         "Siphons life force from an enemy. Heals you as it hurts them.",
+}
+
 ALL_CARDS = [
     # Elements
     "Rock", "Paper", "Scissors", "Fire", "Water", "Wind", "Earth", "Lightning",
@@ -124,6 +169,24 @@ def panel(surf, rect, r=10):
 
 def clamp(val, lo, hi):
     return max(lo, min(hi, val))
+
+
+def wrap_text(font, text, max_width):
+    """Wrap text to fit within max_width. Returns list of lines."""
+    words = text.split(' ')
+    lines = []
+    current = ""
+    for word in words:
+        test = (current + " " + word).strip()
+        if font.size(test)[0] <= max_width:
+            current = test
+        else:
+            if current:
+                lines.append(current)
+            current = word
+    if current:
+        lines.append(current)
+    return lines
 
 
 # =====================
@@ -302,12 +365,11 @@ class DeckSelector:
 
 
 # =====================
-# Card Preview Panel
+# Card Preview Panel (now rendered inside sidebar)
 # =====================
 class CardPreview:
     """
-    Shows a large card preview on the left side.
-    Updated whenever a card is hovered or dragged.
+    Shows a card preview. Now drawn as part of the sidebar instead of a separate left panel.
     """
 
     # Suit symbols for suited cards
@@ -333,10 +395,9 @@ class CardPreview:
         "Drain": (160, 60, 160),
     }
 
-    def __init__(self, display, fonts, rect):
+    def __init__(self, display, fonts):
         self.display  = display
         self.fonts    = fonts
-        self.rect     = rect        # pygame.Rect for the preview area
         self.card     = None
         self.count    = 0           # copies in current deck
 
@@ -350,27 +411,29 @@ class CardPreview:
         name = card.split(" of ")[0] if " of " in card else card
         return self.TYPE_COLORS.get(name, BLUE)
 
-    def draw(self):
-        r = self.rect
-        panel(self.display, r, r=12)
-
+    def draw_in_sidebar(self, sx, cy, preview_w):
+        """Draw the card preview inside the sidebar. Returns the new cy position."""
         if self.card is None:
             t = self.fonts["small"].render("Hover a card", True, MUTED)
-            self.display.blit(t, (r.centerx - t.get_width() // 2, r.centery))
-            return
+            self.display.blit(t, (sx + preview_w // 2 - t.get_width() // 2, cy + 10))
+            t2 = self.fonts["small"].render("to preview it", True, DIM)
+            self.display.blit(t2, (sx + preview_w // 2 - t2.get_width() // 2, cy + 28))
+            cy += 56
+            return cy
 
         accent = self._accent(self.card)
 
         # Accent top bar
-        top = pygame.Rect(r.x, r.y, r.w, 6)
+        top = pygame.Rect(sx, cy, preview_w, 5)
         pygame.draw.rect(self.display, accent, top,
-                         border_top_left_radius=12, border_top_right_radius=12)
+                         border_top_left_radius=6, border_top_right_radius=6)
+        cy += 6
 
-        # Large card name
         name = self.card
         fl   = self.fonts["large"]
         fn   = self.fonts["normal"]
         fs   = self.fonts["small"]
+        fd   = self.fonts.get("desc", fs)
 
         # Suited card special rendering
         if " of " in name:
@@ -379,34 +442,43 @@ class CardPreview:
             sym        = self.SUIT_SYM.get(suit, "")
 
             rs = fl.render(rank, True, accent)
-            self.display.blit(rs, (r.centerx - rs.get_width() // 2, r.y + 24))
+            self.display.blit(rs, (sx + preview_w // 2 - rs.get_width() // 2, cy + 4))
+            cy += rs.get_height() + 4
 
-            ss = pygame.font.Font(None, 80).render(sym, True, suit_col)
-            self.display.blit(ss, (r.centerx - ss.get_width() // 2, r.y + 72))
+            ss = pygame.font.Font(None, 60).render(sym, True, suit_col)
+            self.display.blit(ss, (sx + preview_w // 2 - ss.get_width() // 2, cy))
+            cy += ss.get_height() + 2
 
             st = fn.render(suit, True, MUTED)
-            self.display.blit(st, (r.centerx - st.get_width() // 2, r.y + 142))
+            self.display.blit(st, (sx + preview_w // 2 - st.get_width() // 2, cy))
+            cy += st.get_height() + 4
         else:
             # Regular card
             ns = fl.render(name, True, WHITE)
-            self.display.blit(ns, (r.centerx - ns.get_width() // 2, r.y + 24))
+            if ns.get_width() > preview_w:
+                ns = fn.render(name, True, WHITE)
+            self.display.blit(ns, (sx + preview_w // 2 - ns.get_width() // 2, cy + 4))
+            cy += ns.get_height() + 6
 
             # Type indicator dot
-            pygame.draw.circle(self.display, accent, (r.centerx, r.y + 100), 28)
-            pygame.draw.circle(self.display, PANEL2, (r.centerx, r.y + 100), 26)
-            pygame.draw.circle(self.display, accent, (r.centerx, r.y + 100), 18)
+            pygame.draw.circle(self.display, accent, (sx + preview_w // 2, cy + 14), 18)
+            pygame.draw.circle(self.display, PANEL2, (sx + preview_w // 2, cy + 14), 16)
+            pygame.draw.circle(self.display, accent, (sx + preview_w // 2, cy + 14), 10)
+            cy += 32
 
         # In-deck count
         if self.count > 0:
             ct = fn.render(f"×{self.count} in deck", True, TEAL)
-            self.display.blit(ct, (r.centerx - ct.get_width() // 2, r.y + 170))
+            self.display.blit(ct, (sx + preview_w // 2 - ct.get_width() // 2, cy))
         else:
             ct = fs.render("not in deck", True, MUTED)
-            self.display.blit(ct, (r.centerx - ct.get_width() // 2, r.y + 174))
+            self.display.blit(ct, (sx + preview_w // 2 - ct.get_width() // 2, cy))
+        cy += ct.get_height() + 6
 
         # Divider
         pygame.draw.line(self.display, BORDER,
-                         (r.x + 12, r.y + 200), (r.right - 12, r.y + 200), 1)
+                         (sx + 4, cy), (sx + preview_w - 4, cy), 1)
+        cy += 6
 
         # Flavour type label
         if " of " in self.card:
@@ -421,7 +493,24 @@ class CardPreview:
             type_label = "Unit"
 
         tl = fs.render(type_label.upper(), True, accent)
-        self.display.blit(tl, (r.centerx - tl.get_width() // 2, r.y + 212))
+        self.display.blit(tl, (sx + preview_w // 2 - tl.get_width() // 2, cy))
+        cy += tl.get_height() + 6
+
+        # Description
+        desc = CARD_DESCRIPTIONS.get(self.card, "A mysterious card with unknown properties.")
+        desc_lines = wrap_text(fd, desc, preview_w - 8)
+        for line in desc_lines:
+            ds = fd.render(line, True, MUTED)
+            self.display.blit(ds, (sx + 4, cy))
+            cy += ds.get_height() + 2
+        cy += 4
+
+        # Divider
+        pygame.draw.line(self.display, BORDER,
+                         (sx + 4, cy), (sx + preview_w - 4, cy), 1)
+        cy += 8
+
+        return cy
 
 
 # =====================
@@ -437,6 +526,7 @@ class DeckManager:
             "large":  pygame.font.Font(None, 40),
             "title":  pygame.font.Font(None, 32),
             "mono":   pygame.font.Font(None, 20),
+            "desc":   pygame.font.Font(None, 19),
         }
 
         self.collection  = list(ALL_CARDS)
@@ -456,15 +546,14 @@ class DeckManager:
         self.status_timer = 0
 
         # ---- Layout -------------------------------------------------
-        # Preview panel (left of main area)
-        prev_rect = pygame.Rect(PAD, DECK_LABEL_Y, PREVIEW_W, 240)
-        self.preview = CardPreview(display, self.fonts, prev_rect)
+        # Preview panel (now rendered inside sidebar, no separate rect)
+        self.preview = CardPreview(display, self.fonts)
 
-        # Deck grid clip rect
+        # Deck grid clip rect (now uses full width)
         deck_clip = pygame.Rect(DECK_PANEL_X, DECK_Y, DECK_PANEL_W, DECK_VIS_H)
         self.deck_grid = CardGrid(display, deck_clip, cols=CARD_COLS)
 
-        # Collection grid clip rect
+        # Collection grid clip rect (now uses full width)
         coll_clip = pygame.Rect(COLL_PANEL_X, COLL_Y, COLL_PANEL_W, COLL_VIS_H)
         self.coll_grid = CardGrid(display, coll_clip, cols=CARD_COLS)
 
@@ -898,13 +987,21 @@ class DeckManager:
 
     def draw_sidebar(self):
         sx = SIDEBAR_X
-        sr = pygame.Rect(sx - 8, 0, WIDTH - sx + 8, HEIGHT)
+        sw = WIDTH - sx + 8
+        sr = pygame.Rect(sx - 8, 0, sw, HEIGHT)
         panel(self.display, sr, r=0)
 
         self._txt("Deck Manager", sx + 6, 18, WHITE, "title")
         self._txt(self.deck_name(), sx + 6, 54, BLUE, "normal")
         pygame.draw.line(self.display, BORDER, (sx, 80), (WIDTH - 4, 80), 1)
 
+        cy = 90
+        preview_w = sw - 30
+
+        # --- Card Preview (moved here from left panel) ---
+        cy = self.preview.draw_in_sidebar(sx + 6, cy, preview_w)
+
+        # --- Controls ---
         controls = [
             ("ESC", "Main menu"),
             ("V",   "View cards"),
@@ -913,10 +1010,10 @@ class DeckManager:
             ("Z",   "Undo"),
             ("C",   "Clear"),
             ("G",   "Generate Hand"),
-
         ]
-        cy = 94
         for key, desc in controls:
+            if cy + 28 > HEIGHT - 10:
+                break
             kr = pygame.Rect(sx + 6, cy, 26, 20)
             rrect(self.display, (32, 44, 62), kr, r=4)
             ks = self.fonts["small"].render(key, True, BLUE)
@@ -924,26 +1021,35 @@ class DeckManager:
             self._txt(desc, sx + 38, cy + 2, MUTED, "small")
             cy += 28
 
-        pygame.draw.line(self.display, BORDER, (sx, cy + 2), (WIDTH - 4, cy + 2), 1)
-        cy += 10
+        if cy + 10 < HEIGHT:
+            pygame.draw.line(self.display, BORDER, (sx, cy + 2), (WIDTH - 4, cy + 2), 1)
+            cy += 10
 
         hints = [("RMB coll.", "add"), ("RMB deck", "remove"), ("Drag", "add")]
         for lbl, act in hints:
+            if cy + 22 > HEIGHT - 10:
+                break
             self._txt(f"{lbl} → {act}", sx + 6, cy, DIM, "small")
             cy += 22
 
-        pygame.draw.line(self.display, BORDER, (sx, cy + 2), (WIDTH - 4, cy + 2), 1)
-        cy += 10
+        if cy + 10 < HEIGHT:
+            pygame.draw.line(self.display, BORDER, (sx, cy + 2), (WIDTH - 4, cy + 2), 1)
+            cy += 10
 
-        self._txt("Stats", sx + 6, cy, WHITE, "small"); cy += 20
-        self._txt(f"Unique  {len(self.deck)}", sx + 6, cy, MUTED, "small"); cy += 20
-        self._txt(f"Total   {self.total_cards()}/{MAX_DECK}", sx + 6, cy, MUTED, "small"); cy += 20
-        self._txt(f"Undos   {len(self.undo_stack)}", sx + 6, cy, MUTED, "small"); cy += 20
+        if cy + 20 < HEIGHT:
+            self._txt("Stats", sx + 6, cy, WHITE, "small"); cy += 20
+        if cy + 20 < HEIGHT:
+            self._txt(f"Unique  {len(self.deck)}", sx + 6, cy, MUTED, "small"); cy += 20
+        if cy + 20 < HEIGHT:
+            self._txt(f"Total   {self.total_cards()}/{MAX_DECK}", sx + 6, cy, MUTED, "small"); cy += 20
+        if cy + 20 < HEIGHT:
+            self._txt(f"Undos   {len(self.undo_stack)}", sx + 6, cy, MUTED, "small"); cy += 20
 
-        pygame.draw.line(self.display, BORDER, (sx, cy + 2), (WIDTH - 4, cy + 2), 1)
-        cy += 10
+        if cy + 10 < HEIGHT:
+            pygame.draw.line(self.display, BORDER, (sx, cy + 2), (WIDTH - 4, cy + 2), 1)
+            cy += 10
 
-        if self.status:
+        if self.status and cy + 20 < HEIGHT:
             col = (GREEN  if any(w in self.status for w in ("Saved","Added","Loaded","Switched"))
                    else RED    if any(w in self.status for w in ("Full","error","No"))
                    else WHITE)
@@ -966,7 +1072,6 @@ class DeckManager:
         self.display.fill(BG)
 
         self.draw_tabs()
-        self.preview.draw()
         self.draw_deck_area()
         self.draw_collection_area()
         self.draw_sidebar()
