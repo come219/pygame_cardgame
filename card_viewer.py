@@ -117,6 +117,9 @@ CARD_CATALOG = [
     {"name": "Reload",          "image": "assets/card_reload.png",           "category": "Special", "desc": "Refreshes your hand. Draw new cards to replace current ones."},
     {"name": "Magical Mallet",  "image": "assets/card_magical_mallet.png",   "category": "Special", "desc": "Shuffle chosen cards back into the deck and draw the same number."},
     {"name": "Jar of Greed",    "image": "assets/card_jar_of_greed.png",     "category": "Special", "desc": "Draw one extra card from your deck. Simple but effective."},
+    
+    
+
     # --- Exodia ---
     {"name": "Exodia",          "image": "assets/card_exodia_the_forbidden_one.png", "category": "Exodia", "desc": "The Forbidden One. Collect all pieces to achieve an instant victory."},
     {"name": "Full Exodia",     "image": "assets/card_full_exodia.png",      "category": "Exodia", "desc": "The complete Exodia assembled. Unleashes unstoppable obliteration."},
@@ -128,6 +131,48 @@ CARD_CATALOG = [
     {"name": "Shadow Exodia",   "image": "assets/card_shadow_of_exodia.png",  "category": "Exodia", "desc": "A dark reflection of Exodia. Mimics the Forbidden One's power."},
     {"name": "Stop Exodia",     "image": "assets/card_stop_exodia.png",       "category": "Exodia", "desc": "Prevents Exodia from being summoned. The ultimate counter."},
     {"name": "Pot of Greed",    "image": "assets/card_pot_of_greed.png",      "category": "Exodia", "desc": "Draw two additional cards. A staple for any Exodia strategy."},
+
+
+    # --- MOBA cards ---
+    {"name": "Safelane",          "image": "assets/card_aaa_moba_safelane.png", "category": "MOBA", "desc": "The safe path in the game. Provides a secure route for your units."},
+    {"name": "Midlane",          "image": "assets/card_aaa_moba_midlane.png", "category": "MOBA", "desc": "The midlane."},
+    {"name": "Offlane",          "image": "assets/card_aaa_moba_offlane.png", "category": "MOBA", "desc": "The offlane."},
+    {"name": "Soft Support",          "image": "assets/card_aaa_moba_soft_support.png", "category": "MOBA", "desc": "Provides support and utility to teammates."},
+    {"name": "Hard Support",          "image": "assets/card_aaa_moba_hard_support.png", "category": "MOBA", "desc": "Provides heavy support and crowd control to teammates."},
+    
+    {"name": "Tri-lane Support",          "image": "assets/card_aaa_moba_tri_lane_support.png", "category": "MOBA", "desc": "The 3rd support."},
+    {"name": "Sapport",          "image": "assets/card_aaa_moba_sapport.png", "category": "MOBA", "desc": "The sapport."},
+    {"name": "Suicide Lane",          "image": "assets/card_aaa_moba_suicide_lane.png", "category": "MOBA", "desc": "The suicide lane."},
+    {"name": "Death Lane",          "image": "assets/card_aaa_moba_death_lane.png", "category": "MOBA", "desc": "The death lane."},
+    {"name": "Tri-laner",          "image": "assets/card_aaa_moba_tri_laner.png", "category": "MOBA", "desc": "The tri-laner."},
+    
+    {"name": "Jungle",          "image": "assets/card_aaa_moba_jungle.png", "category": "MOBA", "desc": "The role that jungles."},
+    {"name": "Roaming",          "image": "assets/card_aaa_moba_roaming.png", "category": "MOBA", "desc": "The role that roams."},
+    {"name": "Roaming Support",          "image": "assets/card_aaa_moba_roaming.png", "category": "MOBA", "desc": "The role that supports the roaming."},
+    
+
+    {"name": "Marksman",          "image": "assets/card_aaa_moba_marksman.png", "category": "MOBA", "desc": "The marksman."},
+    {"name": "Mid laner",          "image": "assets/card_aaa_moba_mid_laner.png", "category": "MOBA", "desc": "The mid laner."},
+    {"name": "Top laner",          "image": "assets/card_aaa_moba_top_laner.png", "category": "MOBA", "desc": "The top laner."},
+    {"name": "Support",          "image": "assets/card_aaa_moba_support.png", "category": "MOBA", "desc": "The support."},
+    {"name": "Jungler",          "image": "assets/card_aaa_moba_jungler.png", "category": "MOBA", "desc": "The jungler."},
+    {"name": "River",          "image": "assets/card_aaa_moba_river.png", "category": "MOBA", "desc": "The riverer."},
+    
+    
+
+    {"name": "Position 1",          "image": "assets/card_aaa_moba_position_1.png", "category": "MOBA", "desc": "The position 1."},
+    {"name": "Position 2",          "image": "assets/card_aaa_moba_position_2.png", "category": "MOBA", "desc": "The position 2."},
+    {"name": "Position 3",          "image": "assets/card_aaa_moba_position_3.png", "category": "MOBA", "desc": "The position 3."},
+    {"name": "Position 4",          "image": "assets/card_aaa_moba_position_4.png", "category": "MOBA", "desc": "The position 4."},
+    {"name": "Position 5",          "image": "assets/card_aaa_moba_position_5.png", "category": "MOBA", "desc": "The position 5."},
+    {"name": "Position 6",          "image": "assets/card_aaa_moba_position_6.png", "category": "MOBA", "desc": "The position 6."},
+    {"name": "Position 0",          "image": "assets/card_aaa_moba_position_0.png", "category": "MOBA", "desc": "The position 0."},
+    
+    
+
+    
+
+
     # --- Holy / Units ---
     {"name": "Holy Knight",     "image": "assets/card_holy_knight.png",      "category": "Units", "desc": "A divine warrior clad in blessed armor. Strikes with holy fury."},
     {"name": "Holy Archer",     "image": "assets/card_holy_archer.png",      "category": "Units", "desc": "A sacred marksman. Fires arrows of light at distant foes."},
