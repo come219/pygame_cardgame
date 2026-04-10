@@ -28,6 +28,11 @@ shop_icon_image_scaled = pygame.transform.scale(shop_icon_image, (250, 250))
 
 # Load images
 card_images = {
+    "Random_Common": pygame.image.load("assets/card_random.png"),
+    "Random_Uncommon": pygame.image.load("assets/card_random.png"),
+    "Random_Pack": pygame.image.load("assets/card_random.png"),
+    "Random_Card": pygame.image.load("assets/card_random.png"),
+    "Featured_Card": pygame.image.load("assets/card_random.png"),
     "Rock": pygame.image.load("assets/card_rock.png"),
     "Paper": pygame.image.load("assets/card_paper.png"),
     "Scissors": pygame.image.load("assets/card_scissors.png"),
@@ -45,6 +50,26 @@ shop_items = [
     {"name": "Scissors", "price": 200, "stock": 10, "image": card_images["Scissors"]},
     {"name": "Lizard", "price": 1000, "stock": 5, "image": card_images["Lizard"]},
     {"name": "Spock", "price": 2000, "stock": 5, "image": card_images["Spock"]},
+
+]
+
+# card back
+# card_accessories_shop_items = [
+#     {"name": "Card Sleeve", "price": 50, "stock": 20, "image": card_images["Random_Card"]},
+#     {"name": "Deck Box", "price": 100, "stock": 15, "image": card_images["Random_Card"]},
+#     {"name": "Playmat", "price": 200, "stock": 10, "image": card_images["Random_Card"]},
+#     {"name": "Card Stand", "price": 30, "stock": 25, "image": card_images["Random_Card"]},
+#     {"name": "Dice Set", "price": 75, "stock": 20, "image": card_images["Random_Card"]},
+# ]
+
+random_shop_items = [
+
+    {"name": "Random Common", "price": 10, "stock": 10, "image": card_images["Random_Common"]},
+    {"name": "Random Uncommon", "price": 20, "stock": 5, "image": card_images["Random_Uncommon"]},
+    {"name": "Random Booster Pack", "price": 999, "stock": 3, "image": card_images["Random_Pack"]},
+    {"name": "Random Card", "price": 99, "stock": 10, "image": card_images["Random_Card"]},
+    {"name": "Featured Card", "price": 999, "stock": 1, "image": card_images["Featured_Card"]},
+
 ]
 
 # Player's currency
@@ -115,15 +140,17 @@ def display_card_shop():
     display_text("Press Q to view card packs", GREY, 50, HEIGHT - 250)
     display_text("Press O to open card pack", GREY, 50, HEIGHT - 200)
     display_text("Press V to View Cards", GREY, 50, HEIGHT - 150)
-    display_text("Press I to View Collection", GREY, 50, HEIGHT - 100)
-    display_text("Press P view Payments & Transactions", GREY, 50, HEIGHT - 50)
+    display_text("Press D to View Deck Manager", GREY, 50, HEIGHT - 100)
     
+    display_text("Press P to view Payments & Transactions", GREY, 50, HEIGHT - 50)
+
     if b_sell_toggle == False:
         display_text("Press B to Buy", GREY, 50, HEIGHT - 350)
     else:
         display_text("Press S to Sell", GREY, 50, HEIGHT - 350)
 
     
+    display_text("Press I to View Collection", GREY, WIDTH/2, HEIGHT - 250)
     display_text("Page 0 / 20", WHITE, WIDTH/2, HEIGHT - 200)
     display_text("Press ← to see previous page", GREY, WIDTH/2, HEIGHT - 150) 
     display_text("Press → to see next page", GREY, WIDTH/2, HEIGHT - 100)

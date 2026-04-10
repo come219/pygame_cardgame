@@ -351,7 +351,22 @@ class CardPreview:
         # Category badge
         cat_s = fs.render(self.card.get("category", "").upper(), True, accent)
         self.display.blit(cat_s, (sx + preview_w // 2 - cat_s.get_width() // 2, cy))
-        cy += cat_s.get_height() + 4
+        cy += cat_s.get_height() + 6
+
+        # Value orb
+        value = self.card.get("value", None)
+        if value is not None:
+            orb_r   = 18
+            orb_cx  = sx + preview_w // 2
+            orb_cy  = cy + orb_r
+            # Outer ring using accent colour
+            pygame.draw.circle(self.display, accent,     (orb_cx, orb_cy), orb_r)
+            pygame.draw.circle(self.display, PANEL2,     (orb_cx, orb_cy), orb_r - 3)
+            pygame.draw.circle(self.display, accent,     (orb_cx, orb_cy), orb_r - 7)
+            vs = fn.render(str(value), True, WHITE)
+            self.display.blit(vs, (orb_cx - vs.get_width() // 2,
+                                   orb_cy - vs.get_height() // 2))
+            cy += orb_r * 2 + 8
 
         # In-deck count
         if self.count > 0:
@@ -555,7 +570,7 @@ class DeckManager:
         # collection is list of card dicts; lookup by name for deck storage
         self.collection   = list(ALL_CARDS)
         self.card_by_name = {c["name"]: c for c in self.collection}
-        self.owned_cards  = {c["name"]: 3 for c in self.collection}
+        self.owned_cards  = {c["name"]: 2 for c in self.collection}
 
         self.decks       = [{}, {}, {}]   # {card_name: count}
         self.active_deck = 0
@@ -1049,8 +1064,10 @@ class DeckManager:
             ("D",   "Choose deck"),
             ("S",   "Save"),
             ("Z",   "Undo"),
-            ("C",   "Clear"),
-            ("H",   "Hand Simulator"),
+            ("C",   "Clear deck"),
+            ("H",   "Hand simulator"),
+            ("R",   "Redraw hand"),
+            ("B",   "Back to coll."),
         ]
         for key, desc in controls:
             if cy + 28 > HEIGHT - 10:
