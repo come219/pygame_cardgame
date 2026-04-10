@@ -150,6 +150,15 @@ def wrap_text(font, text, max_w):
     return lines
 
 
+def draw_value_orb(surf, value, cx, cy, accent, font, orb_r=11):
+    """Concentric-ring orb with a numeric value centred inside."""
+    pygame.draw.circle(surf, accent, (cx, cy), orb_r)
+    pygame.draw.circle(surf, PANEL2,  (cx, cy), orb_r - 3)
+    pygame.draw.circle(surf, accent, (cx, cy), orb_r - 6)
+    vs = font.render(str(value), True, WHITE)
+    surf.blit(vs, (cx - vs.get_width() // 2, cy - vs.get_height() // 2))
+
+
 def card_accent(card_dict):
     """Return accent colour for a card dict based on its category."""
     return CATEGORY_COLORS.get(card_dict.get("category", ""), BLUE)
@@ -565,6 +574,7 @@ class DeckManager:
             "large":  pygame.font.Font(None, 40),
             "title":  pygame.font.Font(None, 32),
             "desc":   pygame.font.Font(None, 19),
+            "tiny":   pygame.font.Font(None, 16),
         }
 
         # collection is list of card dicts; lookup by name for deck storage
@@ -594,6 +604,7 @@ class DeckManager:
 
         self.selector = DeckSelector(display, self.fonts)
         self.hand_sim = HandSimulator(display, self.fonts, self.card_dict)
+        self.active_coll_cat = "All"   # collection category filter
 
         self.load_decks()
 
@@ -615,6 +626,11 @@ class DeckManager:
 
     def card_dict(self, name):
         return self.card_by_name.get(name)
+
+    def filtered_collection(self):
+        if self.active_coll_cat == "All":
+            return self.collection
+        return [c for c in self.collection if c.get("category") == self.active_coll_cat]
 
     # =====================
     # File I/O
@@ -689,6 +705,12 @@ class DeckManager:
                     self.coll_grid.scroll(dy)
 
             elif e.type == pygame.MOUSEBUTTONDOWN:
+                if not self.hand_sim.active and e.button == 1:
+                    for cat, pr in getattr(self, "_coll_cat_pills", []):
+                        if pr.collidepoint(e.pos):
+                            self.active_coll_cat = cat
+                            self.coll_grid.reset_scroll()
+                            break
                 if self.hand_sim.active and e.button == 1:
                     result = self.hand_sim.handle_click(e.pos, self.deck)
                     if result == "back":
@@ -943,6 +965,14 @@ class DeckManager:
             ns = pygame.font.Font(None, 16).render(name, True, WHITE if not greyed else MUTED)
         self.display.blit(ns, (rx + CARD_W // 2 - ns.get_width() // 2, ry + CARD_H - 18))
 
+        # Value orb — bottom-left corner
+        value = card_dict.get("value", None)
+        if value is not None:
+            orb_col = MUTED if greyed else accent
+            draw_value_orb(self.display, value,
+                           rx + 12, ry + CARD_H - 14,
+                           orb_col, self.fonts["tiny"], orb_r=11)
+
         # Stack badge (deck only)
         if in_deck:
             count = self.deck.get(name, 0)
@@ -995,7 +1025,8 @@ class DeckManager:
                             max(1, (len(deck_dicts) + CARD_COLS - 1) // CARD_COLS))
 
     def draw_collection_area(self):
-        self.coll_grid.update_max_scroll(len(self.collection))
+        filt = self.filtered_collection()
+        self.coll_grid.update_max_scroll(len(filt))
 
         panel_r = pygame.Rect(COLL_PANEL_X - PAD, COLL_LABEL_Y - 4,
                               COLL_PANEL_W + PAD + 12, COLL_VIS_H + 34)
@@ -1003,12 +1034,33 @@ class DeckManager:
 
         lx, ly = COLL_PANEL_X, COLL_LABEL_Y
         self._txt("COLLECTION", lx, ly, MUTED, "small")
-        self._txt(f"{len(self.collection)} cards", lx + 92, ly, MUTED, "small")
+        self._txt(f"{len(filt)}/{len(self.collection)}", lx + 92, ly, MUTED, "small")
         if self.coll_grid._max_scroll > 0:
             self._txt("scroll ↕", panel_r.right - 68, ly, DIM, "small")
 
+        # Category filter pills
+        cats = ["All"] + sorted(set(c.get("category","") for c in self.collection if c.get("category")))
+        pill_x = lx + 160
+        for cat in cats:
+            from deck_viewer import CATEGORY_COLORS as CC
+            col    = CC.get(cat, BLUE)
+            active = (cat == self.active_coll_cat)
+            pr     = pygame.Rect(pill_x, ly - 1, max(30, self.fonts["tiny"].size(cat)[0] + 10), 18)
+            rrect(self.display, (30, 44, 62) if active else PANEL2, pr, r=4)
+            rrect(self.display, col if active else BORDER, pr, r=4, bw=1)
+            cs = self.fonts["tiny"].render(cat, True, WHITE if active else MUTED)
+            self.display.blit(cs, (pr.x + pr.w // 2 - cs.get_width() // 2,
+                                   pr.y + pr.h // 2 - cs.get_height() // 2))
+            pill_x += pr.w + 5
+        self._coll_cat_pills = list(zip(cats,
+            [pygame.Rect(lx + 160 + sum(
+                max(30, self.fonts["tiny"].size(c)[0] + 10) + 5 for c in cats[:i]
+            ), ly - 1,
+            max(30, self.fonts["tiny"].size(cat)[0] + 10), 18)
+             for i, cat in enumerate(cats)]))
+
         self.coll_grid.draw_clip_start()
-        for i, cd in enumerate(self.collection):
+        for i, cd in enumerate(filt):
             pos   = self.coll_grid.card_pos(i)
             name  = cd["name"]
             avail = self.copies_avail(name)
@@ -1023,7 +1075,7 @@ class DeckManager:
         self.coll_grid.draw_clip_end()
 
         self.draw_scrollbar(self.coll_grid,
-                            max(1, (len(self.collection) + CARD_COLS - 1) // CARD_COLS))
+                            max(1, (len(filt) + CARD_COLS - 1) // CARD_COLS))
 
     def draw_tabs(self):
         for i, d in enumerate(DECK_DEFS):
@@ -1094,13 +1146,25 @@ class DeckManager:
             pygame.draw.line(self.display, BORDER, (sx, cy + 2), (WIDTH - 4, cy + 2), 1)
             cy += 10
 
-        for label, val in [("Unique", len(self.deck)),
-                            ("Total",  f"{self.total_cards()}/{MAX_DECK}"),
-                            ("Undos",  len(self.undo_stack))]:
-            if cy + 20 > HEIGHT - 10:
-                break
-            self._txt(f"{label}  {val}", sx + 6, cy, MUTED, "small")
-            cy += 20
+        if self.hand_sim.active:
+            hand_stats = [
+                ("Hand",  len(self.hand_sim.hand)),
+                ("Pile",  len(self.hand_sim.draw_pile)),
+                ("Total", self.total_cards()),
+            ]
+            for label, val in hand_stats:
+                if cy + 20 > HEIGHT - 10: break
+                col = TEAL if label == "Hand" else MUTED
+                self._txt(f"{label}  {val}", sx + 6, cy, col, "small")
+                cy += 20
+        else:
+         for label, val in [("Unique", len(self.deck)),
+                             ("Total",  f"{self.total_cards()}/{MAX_DECK}"),
+                             ("Undos",  len(self.undo_stack))]:
+             if cy + 20 > HEIGHT - 10:
+                 break
+             self._txt(f"{label}  {val}", sx + 6, cy, MUTED, "small")
+             cy += 20
 
         if self.status and cy + 10 < HEIGHT:
             pygame.draw.line(self.display, BORDER, (sx, cy + 2), (WIDTH - 4, cy + 2), 1)
@@ -1126,9 +1190,19 @@ class DeckManager:
         s = self.fonts["small"].render(self.dragging_card, True, WHITE)
         self.display.blit(s, (dx + CARD_W // 2 - s.get_width() // 2, dy + CARD_H - 18))
 
+    def _draw_header(self):
+        bar = pygame.Rect(0, 0, WIDTH, TABS_Y + TABS_H + 2)
+        rrect(self.display, PANEL, bar, r=0)
+        pygame.draw.line(self.display, BORDER, (0, bar.bottom), (SIDEBAR_X, bar.bottom), 1)
+        self._txt("✦  Deck Builder", 14, TABS_Y + 10, WHITE, "title")
+        mode = "HAND MODE" if self.hand_sim.active else self.deck_name().upper()
+        col  = TEAL if self.hand_sim.active else BLUE
+        self._txt(mode, 220, TABS_Y + 12, col, "small")
+
     def draw(self):
         self.tick_status()
         self.display.fill(BG)
+        self._draw_header()
         self.draw_tabs()
         self.draw_deck_area()
         if self.hand_sim.active:

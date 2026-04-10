@@ -1,0 +1,48 @@
+{
+  "display": {
+    "resolution": [
+      1920,
+      1080
+    ],
+    "fullscreen": false,
+    "vsync": true,
+    "fps_limit": 60,
+    "theme": "Dark Slate"
+  },
+  "audio": {
+    "master_volume": 25,
+    "music_volume": 70,
+    "sfx_volume": 90,
+    "muted": false
+  },
+  "gameplay": {
+    "player_name": "Player",
+    "starting_balance": 7984,
+    "auto_save": true,
+    "show_hints": true,
+    "card_animation_speed": 2,
+    "confirm_bets": true,
+    "show_hand_value": true
+  },
+  "controls": {
+    "hit_key": "H",
+    "stand_key": "S",
+    "double_key": "D",
+    "split_key": "P",
+    "surrender_key": "R"
+  },
+  "accessibility": {
+    "colorblind_mode": false,
+    "large_text": false,
+    "high_contrast": false,
+    "screen_shake": false
+  },
+  "about": {
+    "game_name": "Casino Suite",
+    "studio": "219 Studios",
+    "website": "www.219Studios.com/game/cardgame",
+    "game_version": "0.3",
+    "python_version": "Python 3.10.11",
+    "pygame_version": "pygame 2.6.1 (SDL 2.28.4)"
+  }
+}

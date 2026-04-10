@@ -741,14 +741,21 @@ pass
 def gametypeMenu():
     '''Game type selection menu function'''
     CURRENT_GAMEMODE_PAGE = 0
-    global gameMenu
+    global gameMenu, selected_deck
     #!event check
     for event in pygame.event.get():
                         #print(event)
         if event.type == pygame.QUIT:
             print('QUIT: by execution!')
             quitgame()
-        elif event.type == pygame.KEYDOWN:                                                 
+        elif event.type == pygame.KEYDOWN:  
+            if event.key == pygame.K_c:
+                print('change deck selection!')
+                selected_deck = selected_deck + 1
+                if selected_deck > 3:
+                    selected_deck = 1
+
+
             if event.key == pygame.K_ESCAPE:
                 print('Return to mainmenu!')
                 gameMenu = 1
@@ -829,6 +836,19 @@ def gametypeMenu():
     oneroundicon(540, 230)          # one round mode
     traditionalroundicon(980, 230)  # traditional mode
     onlineroundicon (1440, 230)     # online mode
+
+
+    if selected_deck == 1:
+        message_to_screen2("DECK: A", salmon, 920, 920)
+    elif selected_deck == 2:
+        message_to_screen2("DECK: B", salmon, 920, 920)
+    elif selected_deck == 3:
+        message_to_screen2("DECK: C", salmon, 920, 920)
+
+    change_deck_button_img = pygame.transform.scale(change_deck_button_scaled, (280, 100))
+    gameDisplay.blit(change_deck_button_img, (WIDTH/2 - 380, HEIGHT - 150))
+    deck_text = font2.render(f"(selected_deck: {selected_deck})", True, white)
+    gameDisplay.blit(deck_text, (WIDTH/2 - 50, HEIGHT - 100))
 
 
 pass
@@ -1068,15 +1088,15 @@ def main():
                 deck_viewer()    # Deck management function
 
             elif gameMenu == 4:
-                settingsMenu()      # Settings menu function
+                import settings
+                settings.main()
+                # settingsMenu()      # Settings menu function
             
             elif gameMenu == 8: 
                 card_viewer()    # Card viewer function
 
             elif gameMenu == 9:
                 changeDeckMenu()    # legacy deck management function
-
-          
             
             elif gameMenu == 0:     # learn game menu function
                 learnMenu() 
