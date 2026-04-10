@@ -52,6 +52,7 @@ dice_roller_Img = pygame.image.load('assets/dice_roller_image.png').convert()
 spock_roundImg = pygame.image.load('assets/spock_round_image.png').convert()
 spock_round_2_player_Img = pygame.image.load('assets/spock_2_player_round_image.png').convert()
 
+tarot_simulator_img = pygame.image.load('assets/tarot_simulator_image.png').convert()
 
 
 gun_duel_img = pygame.image.load('assets/gun_duel_image.png').convert()
@@ -166,6 +167,10 @@ def shoot_reload_repeat_icon(x, y):
     screen.blit(smaller_roundImg, (x, y))
 pass
 
+def tarot_simulator_icon(x, y):
+    smaller_roundImg = pygame.transform.scale(tarot_simulator_img, (200, 350))
+    screen.blit(smaller_roundImg, (x, y))
+
 ROW_0_HEIGHT = 230
 ROW_1_HEIGHT = 620
 
@@ -229,6 +234,7 @@ def _page_2():
     '''Game type selection menu function'''
     gun_duel_icon(120, 230)      # 
     shoot_reload_repeat_icon(340, 230)  # 
+    tarot_simulator_icon(580, 230)
         
 pass
 

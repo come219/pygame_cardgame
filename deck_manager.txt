@@ -1,8 +1,42 @@
 [Deck A]
-  Wolf x2
+  Fundamentals x2
+  Paper x1
+  Rock x2
+  Scissors x1
+  Skissors x2
+  Super Paper x2
+  Toon Bookmark x2
+  Toon Kingdom x1
+  Toon T.O.C. x2
+  Toon World x1
 
 [Deck B]
-  (empty)
+  Balance x2
+  Devil x2
+  Dragon x2
+  Fundamentals x2
+  Gun x2
+  Lightning x2
+  No Lose x2
+  Non-Core x2
+  Paper x2
+  Pot of Greed x2
+  Rock x2
+  Scissors x2
+  Snake x2
 
 [Deck C]
-  (empty)
+  Balance x2
+  Counter Stop x2
+  Exodia x1
+  Fundamentals x2
+  Left Arm x1
+  Left Leg x1
+  Magical Mallet x2
+  No Lose x2
+  Non-Core x2
+  Pot of Greed x2
+  Reload x2
+  Right Arm x1
+  Right Leg x1
+  Stop Card x2

@@ -1119,7 +1119,9 @@ class DeckManager:
             ("C",   "Clear deck"),
             ("H",   "Hand simulator"),
             ("R",   "Redraw hand"),
-            ("B",   "Back to coll."),
+            ("T",   "Draw card"),
+            ("B",   "Back to collection"),
+            ("Arrow Keys",   "Move preview card"),
         ]
         for key, desc in controls:
             if cy + 28 > HEIGHT - 10:

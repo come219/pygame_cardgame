@@ -155,3 +155,538 @@
 [Deck C]
   (empty)
 
+=== Saved 2026-04-10 15:43:24 ===
+[Deck A]
+  Paper x2
+  Rock x2
+  Scissors x2
+
+[Deck B]
+  (empty)
+
+[Deck C]
+  (empty)
+
+=== Saved 2026-04-10 15:47:24 ===
+[Deck A]
+  Fundamentals x2
+  Paper x2
+  Rock x2
+  Scissors x2
+  Skissors x2
+  Super Paper x2
+  Toon Bookmark x2
+  Toon Kingdom x2
+  Toon T.O.C. x2
+  Toon World x2
+
+[Deck B]
+  (empty)
+
+[Deck C]
+  (empty)
+
+=== Saved 2026-04-10 15:48:26 ===
+[Deck A]
+  Fundamentals x2
+  Paper x2
+  Rock x2
+  Scissors x2
+  Skissors x2
+  Super Paper x2
+  Toon Bookmark x2
+  Toon Kingdom x1
+  Toon T.O.C. x2
+  Toon World x1
+
+[Deck B]
+  (empty)
+
+[Deck C]
+  (empty)
+
+=== Saved 2026-04-10 15:48:27 ===
+[Deck A]
+  Fundamentals x2
+  Paper x2
+  Rock x2
+  Scissors x2
+  Skissors x2
+  Super Paper x2
+  Toon Bookmark x2
+  Toon Kingdom x1
+  Toon T.O.C. x2
+  Toon World x1
+
+[Deck B]
+  (empty)
+
+[Deck C]
+  (empty)
+
+=== Saved 2026-04-10 15:48:27 ===
+[Deck A]
+  Fundamentals x2
+  Paper x2
+  Rock x2
+  Scissors x2
+  Skissors x2
+  Super Paper x2
+  Toon Bookmark x2
+  Toon Kingdom x1
+  Toon T.O.C. x2
+  Toon World x1
+
+[Deck B]
+  (empty)
+
+[Deck C]
+  (empty)
+
+=== Saved 2026-04-10 15:48:28 ===
+[Deck A]
+  Fundamentals x2
+  Paper x2
+  Rock x2
+  Scissors x2
+  Skissors x2
+  Super Paper x2
+  Toon Bookmark x2
+  Toon Kingdom x1
+  Toon T.O.C. x2
+  Toon World x1
+
+[Deck B]
+  (empty)
+
+[Deck C]
+  (empty)
+
+=== Saved 2026-04-10 15:48:28 ===
+[Deck A]
+  Fundamentals x2
+  Paper x2
+  Rock x2
+  Scissors x2
+  Skissors x2
+  Super Paper x2
+  Toon Bookmark x2
+  Toon Kingdom x1
+  Toon T.O.C. x2
+  Toon World x1
+
+[Deck B]
+  (empty)
+
+[Deck C]
+  (empty)
+
+=== Saved 2026-04-10 15:48:28 ===
+[Deck A]
+  Fundamentals x2
+  Paper x2
+  Rock x2
+  Scissors x2
+  Skissors x2
+  Super Paper x2
+  Toon Bookmark x2
+  Toon Kingdom x1
+  Toon T.O.C. x2
+  Toon World x1
+
+[Deck B]
+  (empty)
+
+[Deck C]
+  (empty)
+
+=== Saved 2026-04-10 15:48:28 ===
+[Deck A]
+  Fundamentals x2
+  Paper x2
+  Rock x2
+  Scissors x2
+  Skissors x2
+  Super Paper x2
+  Toon Bookmark x2
+  Toon Kingdom x1
+  Toon T.O.C. x2
+  Toon World x1
+
+[Deck B]
+  (empty)
+
+[Deck C]
+  (empty)
+
+=== Saved 2026-04-10 15:48:28 ===
+[Deck A]
+  Fundamentals x2
+  Paper x2
+  Rock x2
+  Scissors x2
+  Skissors x2
+  Super Paper x2
+  Toon Bookmark x2
+  Toon Kingdom x1
+  Toon T.O.C. x2
+  Toon World x1
+
+[Deck B]
+  (empty)
+
+[Deck C]
+  (empty)
+
+=== Saved 2026-04-10 15:53:08 ===
+[Deck A]
+  Fundamentals x2
+  Paper x1
+  Rock x2
+  Scissors x1
+  Skissors x2
+  Super Paper x2
+  Toon Bookmark x2
+  Toon Kingdom x1
+  Toon T.O.C. x2
+  Toon World x1
+
+[Deck B]
+  (empty)
+
+[Deck C]
+  (empty)
+
+=== Saved 2026-04-10 15:53:43 ===
+[Deck A]
+  Fundamentals x2
+  Paper x1
+  Rock x2
+  Scissors x1
+  Skissors x2
+  Super Paper x2
+  Toon Bookmark x2
+  Toon Kingdom x1
+  Toon T.O.C. x2
+  Toon World x1
+
+[Deck B]
+  (empty)
+
+[Deck C]
+  (empty)
+
+=== Saved 2026-04-10 15:54:02 ===
+[Deck A]
+  Fundamentals x2
+  Paper x1
+  Rock x2
+  Scissors x1
+  Skissors x2
+  Super Paper x2
+  Toon Bookmark x2
+  Toon Kingdom x1
+  Toon T.O.C. x2
+  Toon World x1
+
+[Deck B]
+  (empty)
+
+[Deck C]
+  (empty)
+
+=== Saved 2026-04-10 15:54:46 ===
+[Deck A]
+  Fundamentals x2
+  Paper x1
+  Rock x2
+  Scissors x1
+  Skissors x2
+  Super Paper x2
+  Toon Bookmark x2
+  Toon Kingdom x1
+  Toon T.O.C. x2
+  Toon World x1
+
+[Deck B]
+  Devil x2
+  Dragon x2
+  Gun x2
+  Non-Core x2
+  Snake x2
+
+[Deck C]
+  (empty)
+
+=== Saved 2026-04-10 15:55:52 ===
+[Deck A]
+  Fundamentals x2
+  Paper x1
+  Rock x2
+  Scissors x1
+  Skissors x2
+  Super Paper x2
+  Toon Bookmark x2
+  Toon Kingdom x1
+  Toon T.O.C. x2
+  Toon World x1
+
+[Deck B]
+  Counter Stop x2
+  Devil x2
+  Dragon x2
+  Gun x2
+  Human x2
+  Non-Core x2
+  Snake x2
+  Stop Card x2
+
+[Deck C]
+  (empty)
+
+=== Saved 2026-04-10 15:57:11 ===
+[Deck A]
+  Fundamentals x2
+  Paper x1
+  Rock x2
+  Scissors x1
+  Skissors x2
+  Super Paper x2
+  Toon Bookmark x2
+  Toon Kingdom x1
+  Toon T.O.C. x2
+  Toon World x1
+
+[Deck B]
+  Counter Stop x2
+  Devil x2
+  Dragon x2
+  Gun x2
+  Human x2
+  Non-Core x2
+  Snake x2
+  Stop Card x2
+
+[Deck C]
+  Exodia x1
+  Left Arm x1
+  Left Leg x1
+  Magical Mallet x2
+  Pot of Greed x2
+  Reload x2
+  Right Arm x1
+  Right Leg x1
+
+=== Saved 2026-04-10 15:58:03 ===
+[Deck A]
+  Fundamentals x2
+  Paper x1
+  Rock x2
+  Scissors x1
+  Skissors x2
+  Super Paper x2
+  Toon Bookmark x2
+  Toon Kingdom x1
+  Toon T.O.C. x2
+  Toon World x1
+
+[Deck B]
+  Counter Stop x2
+  Devil x2
+  Dragon x2
+  Gun x2
+  Human x2
+  Non-Core x2
+  Snake x2
+  Stop Card x2
+
+[Deck C]
+  Balance x2
+  Counter Stop x2
+  Exodia x1
+  Fundamentals x2
+  Left Arm x1
+  Left Leg x1
+  Magical Mallet x2
+  No Lose x2
+  Non-Core x2
+  Pot of Greed x2
+  Reload x2
+  Right Arm x1
+  Right Leg x1
+  Stop Card x2
+
+=== Saved 2026-04-10 16:03:15 ===
+[Deck A]
+  Fundamentals x2
+  Paper x1
+  Rock x2
+  Scissors x1
+  Skissors x2
+  Super Paper x2
+  Toon Bookmark x2
+  Toon Kingdom x1
+  Toon T.O.C. x2
+  Toon World x1
+
+[Deck B]
+  Balance x2
+  Devil x2
+  Dragon x2
+  Fundamentals x2
+  Gun x2
+  Lightning x2
+  No Lose x2
+  Non-Core x2
+  Paper x2
+  Rock x2
+  Scissors x2
+  Snake x2
+
+[Deck C]
+  Balance x2
+  Counter Stop x2
+  Exodia x1
+  Fundamentals x2
+  Left Arm x1
+  Left Leg x1
+  Magical Mallet x2
+  No Lose x2
+  Non-Core x2
+  Pot of Greed x2
+  Reload x2
+  Right Arm x1
+  Right Leg x1
+  Stop Card x2
+
+=== Saved 2026-04-10 16:04:41 ===
+[Deck A]
+  Fundamentals x2
+  Paper x1
+  Rock x2
+  Scissors x1
+  Skissors x2
+  Super Paper x2
+  Toon Bookmark x2
+  Toon Kingdom x1
+  Toon T.O.C. x2
+  Toon World x1
+
+[Deck B]
+  Balance x2
+  Devil x2
+  Dragon x2
+  Fundamentals x2
+  Gun x2
+  Lightning x2
+  No Lose x2
+  Non-Core x2
+  Paper x2
+  Rock x2
+  Scissors x2
+  Snake x2
+
+[Deck C]
+  Balance x2
+  Counter Stop x2
+  Exodia x1
+  Fundamentals x2
+  Left Arm x1
+  Left Leg x1
+  Magical Mallet x2
+  No Lose x2
+  Non-Core x2
+  Pot of Greed x2
+  Reload x2
+  Right Arm x1
+  Right Leg x1
+  Stop Card x2
+
+=== Saved 2026-04-10 16:05:01 ===
+[Deck A]
+  Fundamentals x2
+  Paper x1
+  Rock x2
+  Scissors x1
+  Skissors x2
+  Super Paper x2
+  Toon Bookmark x2
+  Toon Kingdom x1
+  Toon T.O.C. x2
+  Toon World x1
+
+[Deck B]
+  Balance x2
+  Devil x2
+  Dragon x2
+  Fundamentals x2
+  Gun x2
+  Lightning x2
+  No Lose x2
+  Non-Core x2
+  Paper x2
+  Pot of Greed x2
+  Rock x2
+  Scissors x2
+  Snake x2
+
+[Deck C]
+  Balance x2
+  Counter Stop x2
+  Exodia x1
+  Fundamentals x2
+  Left Arm x1
+  Left Leg x1
+  Magical Mallet x2
+  No Lose x2
+  Non-Core x2
+  Pot of Greed x2
+  Reload x2
+  Right Arm x1
+  Right Leg x1
+  Stop Card x2
+
+=== Saved 2026-04-10 16:06:54 ===
+[Deck A]
+  Fundamentals x2
+  Paper x1
+  Rock x2
+  Scissors x1
+  Skissors x2
+  Super Paper x2
+  Toon Bookmark x2
+  Toon Kingdom x1
+  Toon T.O.C. x2
+  Toon World x1
+
+[Deck B]
+  Balance x2
+  Devil x2
+  Dragon x2
+  Fundamentals x2
+  Gun x2
+  Lightning x2
+  No Lose x2
+  Non-Core x2
+  Paper x2
+  Pot of Greed x2
+  Rock x2
+  Scissors x2
+  Snake x2
+
+[Deck C]
+  Balance x2
+  Counter Stop x2
+  Exodia x1
+  Fundamentals x2
+  Left Arm x1
+  Left Leg x1
+  Magical Mallet x2
+  No Lose x2
+  Non-Core x2
+  Pot of Greed x2
+  Reload x2
+  Right Arm x1
+  Right Leg x1
+  Stop Card x2
+

@@ -139,6 +139,7 @@ playgamebuttonImg = pygame.image.load("assets/button_play_game.png").convert()
 changedeckbuttonImg = pygame.image.load("assets/button_change_deck.png").convert()
 deck_manager_image = pygame.image.load("assets/button_deck_manager.png").convert()
 deck_simulator_button_image = pygame.image.load("assets/button_deck_simulator.png").convert()
+rpg_button_image = pygame.image.load("assets/button_rpg.png").convert()
 view_cards_button_Img = pygame.image.load("assets/button_view_cards.png").convert()
 learnImg = pygame.image.load("assets/button_learn.png").convert()
 settingsbuttonImg = pygame.image.load("assets/button_settings.png").convert()
@@ -149,6 +150,7 @@ base_button_image_scaled = pygame.transform.scale(base_button_image, (300, 300))
 play_game_button_scaled = pygame.transform.scale(playgamebuttonImg, (300, 120))
 change_deck_button_scaled = pygame.transform.scale(changedeckbuttonImg, (300, 120))
 deck_simulator_button_scaled = pygame.transform.scale(deck_simulator_button_image, (300, 120))
+rpg_button_scaled = pygame.transform.scale(rpg_button_image, (300, 120))
 
 deck_manager_scaled = pygame.transform.scale(deck_manager_image, (300, 120))
 view_cards_button_scaled = pygame.transform.scale(view_cards_button_Img, (300, 120))
@@ -675,6 +677,11 @@ def mainMenu():
                 print('Enter learn game!')
                 gameMenu = 0
 
+            if event.key == pygame.K_r:
+                print('Enter learn game!')
+                gameMenu = 99
+
+
     #gameBackground fill
     gameDisplay.fill(black)
 
@@ -692,7 +699,8 @@ def mainMenu():
     message_to_screen2("(status: 0)", grey, 420, 600)
 
     # buttons, ordered
-    drawImage(deck_simulator_button_scaled,  910, 420)
+    # drawImage(deck_simulator_button_scaled,  910, 420)
+    drawImage(rpg_button_scaled,  910, 420)
     drawImage(deck_manager_scaled,  910, 550)
 
     if selected_deck == 1:
@@ -1097,6 +1105,10 @@ def main():
 
             elif gameMenu == 9:
                 changeDeckMenu()    # legacy deck management function
+
+            elif gameMenu == 99:
+                import rpg
+                rpg.main()  # RPG game mode function
             
             elif gameMenu == 0:     # learn game menu function
                 learnMenu() 
