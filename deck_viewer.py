@@ -411,45 +411,35 @@ class CardPreview:
 class HandSimulator:
     """
     Replaces the collection area when active.
-    H        – open/close
-    R        – redraw full 7-card hand
-    DRAW/D+  – draw one more card
-    BACK/B   – return to collection view
+    H   – open / close
+    D   – draw one more card  (also +1 Draw button)
+    R   – redraw full opening hand
+    B   – return to collection
     """
-    HAND_SIZE    = 7
-    CARD_SPACING = CARD_W + 16
+    HAND_SIZE = 7
 
     def __init__(self, display, fonts, card_dict_fn):
-        self.display      = display
-        self.fonts        = fonts
-        self.card_dict    = card_dict_fn   # callable: name -> dict
-        self.active       = False
-        self.hand         = []             # list of card name strings
-        self.draw_pile    = []             # remaining shuffled deck
+        self.display   = display
+        self.fonts     = fonts
+        self.card_dict = card_dict_fn
+        self.active    = False
+        self.hand      = []        # list of card name strings
+        self.draw_pile = []
+        self.last_drawn_idx = -1   # index of most-recently drawn card (-1 = none)
+        self._btn_rects = {}
+        self._card_positions = []
 
-        # Layout: hand sits where collection normally is
-        # Centre the hand cards horizontally
-        self._update_layout()
-
-    def _update_layout(self):
-        """Recalculate card positions for the current hand size."""
-        total_w = len(self.hand) * CARD_W + max(0, len(self.hand) - 1) * 16
-        start_x = max(PAD, (SIDEBAR_X - total_w) // 2)
-        self._card_positions = [
-            (start_x + i * (CARD_W + 16), COLL_Y)
-            for i in range(len(self.hand))
-        ]
-
+    # ------------------------------------------------------------------
     def open(self, deck):
-        """Shuffle deck and draw opening hand."""
         self.active = True
         self._shuffle_deck(deck)
         self._draw_opening_hand()
 
     def close(self):
-        self.active = False
-        self.hand      = []
-        self.draw_pile = []
+        self.active         = False
+        self.hand           = []
+        self.draw_pile      = []
+        self.last_drawn_idx = -1
 
     def _shuffle_deck(self, deck):
         import random
@@ -460,106 +450,199 @@ class HandSimulator:
         self.draw_pile = pile
 
     def _draw_opening_hand(self):
-        """Draw up to HAND_SIZE cards."""
         self.hand = []
         for _ in range(self.HAND_SIZE):
             if self.draw_pile:
                 self.hand.append(self.draw_pile.pop())
-        self._update_layout()
+        self.last_drawn_idx = len(self.hand) - 1 if self.hand else -1
 
     def draw_one(self):
-        """Draw a single card into the hand."""
+        """Draw one card from the pile into the hand. Returns True if successful."""
         if self.draw_pile:
             self.hand.append(self.draw_pile.pop())
-            self._update_layout()
+            self.last_drawn_idx = len(self.hand) - 1
             return True
+        self.last_drawn_idx = -1
         return False
 
     def redraw(self, deck):
-        """Reshuffle and draw a fresh opening hand."""
         self._shuffle_deck(deck)
         self._draw_opening_hand()
 
-    def hovered_card(self, pos):
-        for i, (cx, cy) in enumerate(self._card_positions):
-            if cx <= pos[0] <= cx + CARD_W and cy <= pos[1] <= cy + CARD_H:
-                return i
-        return None
+    # ------------------------------------------------------------------
+    def _layout(self, panel_r):
+        """
+        Calculate (col, row) grid positions for each card in the hand.
+        Cards wrap into rows to fill the panel width, with a max card
+        size chosen so they always fit without overflow.
+        """
+        if not self.hand:
+            self._card_positions = []
+            return
 
+        count    = len(self.hand)
+        # Available width inside the panel (leave room for scrollbar gutter)
+        avail_w  = panel_r.width - 24
+        avail_h  = COLL_VIS_H - 4
+
+        # Try to fit in 1 row first, then 2, then 3
+        for rows in (1, 2, 3):
+            cols      = -(-count // rows)   # ceil div
+            cw        = min(CARD_W, (avail_w - (cols - 1) * 8) // cols)
+            ch        = int(cw * (CARD_H / CARD_W))
+            row_h     = ch + 8
+            if row_h * rows <= avail_h:
+                break
+
+        # Centre the grid inside the panel
+        total_card_w = cols * cw + (cols - 1) * 8
+        total_card_h = rows * row_h
+        ox = panel_r.x + (panel_r.width - total_card_w) // 2
+        oy = COLL_Y + (avail_h - total_card_h) // 2
+
+        self._card_positions = []
+        self._card_size      = (cw, ch)
+        for i in range(count):
+            c = i % cols
+            r = i // cols
+            self._card_positions.append((ox + c * (cw + 8), oy + r * row_h))
+
+    # ------------------------------------------------------------------
     def draw_area(self, draw_card_widget_fn):
-        """Draw the hand simulator section in place of the collection."""
-        d = self.display
+        d  = self.display
         fs = self.fonts["small"]
         fn = self.fonts["normal"]
-        fl = self.fonts["large"]
+        ft = self.fonts.get("tiny", fs)
 
-        # Panel background
         panel_r = pygame.Rect(COLL_PANEL_X - PAD, COLL_LABEL_Y - 4,
                               COLL_PANEL_W + PAD + 12, COLL_VIS_H + 34)
         rrect(d, PANEL, panel_r, r=10)
         rrect(d, BORDER, panel_r, r=10, bw=1)
 
-        # Header
+        # ── Header row ────────────────────────────────────────────────
         lx, ly = COLL_PANEL_X, COLL_LABEL_Y
-        hs = fn.render("HAND SIMULATOR", lx, 0, TEAL)  # just measuring
         hs = fn.render("HAND SIMULATOR", True, TEAL)
         d.blit(hs, (lx, ly))
 
-        pile_txt = fs.render(f"{len(self.draw_pile)} cards left in pile", True, MUTED)
-        d.blit(pile_txt, (lx + hs.get_width() + 16, ly + 2))
+        pile_col = MUTED if self.draw_pile else RED
+        pile_lbl = f"{len(self.draw_pile)} in pile" if self.draw_pile else "pile empty"
+        pt = fs.render(pile_lbl, True, pile_col)
+        d.blit(pt, (lx + hs.get_width() + 12, ly + 2))
 
-        # Button strip
-        bx = panel_r.right - 4
+        hand_t = fs.render(f"{len(self.hand)} cards in hand", True, MUTED)
+        d.blit(hand_t, (lx + hs.get_width() + 12 + pt.get_width() + 16, ly + 2))
+
+        # ── Buttons ───────────────────────────────────────────────────
+        mx, my  = pygame.mouse.get_pos()
         buttons = [
-            ("R  Redraw",   AMBER,  120),
-            ("+1  Draw",    TEAL,   90),
-            ("B  Back",     MUTED,  80),
+            ("B  Back",       MUTED,  80),
+            ("+1  Draw  [D]", TEAL,  110),
+            ("R  Redraw",     AMBER, 110),
         ]
-        mx, my = pygame.mouse.get_pos()
         self._btn_rects = {}
-        for label, col, w in reversed(buttons):
-            bx -= w + 8
-            br = pygame.Rect(bx, ly - 2, w, 22)
+        bx = panel_r.right - 6
+        for label, col, w in buttons:
+            bx -= w + 6
+            br  = pygame.Rect(bx, ly - 2, w, 22)
             hov = br.collidepoint(mx, my)
-            rrect(d, (35, 48, 68) if hov else (25, 30, 44), br, r=5)
-            rrect(d, col, br, r=5, bw=1, bc=col)
-            ts = fs.render(label, True, WHITE if hov else col)
+            disabled = ("Draw" in label and not self.draw_pile)
+            bg  = (35, 48, 68) if (hov and not disabled) else (22, 26, 36)
+            bc  = col if not disabled else DIM
+            rrect(d, bg, br, r=5)
+            rrect(d, bc, br, r=5, bw=1, bc=bc)
+            ts = fs.render(label, True, (WHITE if hov and not disabled else (bc)))
             d.blit(ts, (br.x + br.w // 2 - ts.get_width() // 2,
                         br.y + br.h // 2 - ts.get_height() // 2))
             self._btn_rects[label] = br
 
-        # Empty hand message
+        # ── Empty hand ────────────────────────────────────────────────
         if not self.hand:
-            t = fn.render("No cards drawn — deck may be empty", True, MUTED)
-            d.blit(t, (panel_r.centerx - t.get_width() // 2,
-                       COLL_Y + COLL_VIS_H // 2 - t.get_height() // 2))
+            msg = fn.render("Deck is empty — nothing to draw", True, MUTED)
+            d.blit(msg, (panel_r.centerx - msg.get_width() // 2,
+                         COLL_Y + COLL_VIS_H // 2 - msg.get_height() // 2))
             return
 
-        # Draw hand cards (centred, single row)
-        self._update_layout()
+        # ── Card grid ─────────────────────────────────────────────────
+        self._layout(panel_r)
+        cw, ch = getattr(self, "_card_size", (CARD_W, CARD_H))
+
         for i, (name, pos) in enumerate(zip(self.hand, self._card_positions)):
             cd = self.card_dict(name)
             if cd:
-                draw_card_widget_fn(cd, pos, in_deck=False, greyed=False)
-            # card index badge
-            idx_s = fs.render(str(i + 1), True, MUTED)
-            d.blit(idx_s, (pos[0] + CARD_W // 2 - idx_s.get_width() // 2,
-                           pos[1] + CARD_H + 2))
+                # Temporarily override global CARD_W/CARD_H for widget sizing
+                # We draw manually here to support variable card size
+                rx, ry  = pos
+                hov     = rx <= mx <= rx + cw and ry <= my <= ry + ch
+                is_new  = (i == self.last_drawn_idx)
+                accent  = card_accent(cd) if cd else BLUE
+
+                if is_new:
+                    bg, bord = CARD_HOV, accent
+                elif hov:
+                    bg, bord = CARD_HOV, CARD_BORD_ACT
+                else:
+                    bg, bord = CARD_BG, CARD_BORD
+
+                r = pygame.Rect(rx, ry, cw, ch)
+                rrect(d, bg, r, r=6)
+                rrect(d, bord, r, r=6, bw=2 if is_new else 1)
+
+                # Glow ring for newest drawn card
+                if is_new:
+                    rrect(d, (*accent, 0), r, r=6, bw=3, bc=accent)
+
+                # Image
+                img_h = ch - 24
+                img   = load_card_image(cd["image"], cw - 4, img_h)
+                d.blit(img, (rx + 2, ry + 5))
+
+                # Accent stripe
+                stripe = pygame.Rect(rx + 1, ry + 1, cw - 2, 4)
+                pygame.draw.rect(d, accent, stripe,
+                                 border_top_left_radius=5, border_top_right_radius=5)
+
+                # Name
+                ns = ft.render(cd["name"], True, WHITE)
+                if ns.get_width() > cw - 4:
+                    ns = pygame.font.Font(None, 14).render(cd["name"], True, WHITE)
+                d.blit(ns, (rx + cw // 2 - ns.get_width() // 2, ry + ch - 16))
+
+                # Value orb
+                val = cd.get("value", None)
+                if val is not None:
+                    draw_value_orb(d, val, rx + 10, ry + ch - 12, accent,
+                                   self.fonts.get("tiny", ft), orb_r=9)
+
+                # "NEW" badge on last drawn card
+                if is_new:
+                    nb = pygame.Rect(rx + cw - 32, ry + ch - 20, 30, 16)
+                    rrect(d, accent, nb, r=3)
+                    nt = ft.render("NEW", True, BG)
+                    d.blit(nt, (nb.x + nb.w // 2 - nt.get_width() // 2,
+                                nb.y + nb.h // 2 - nt.get_height() // 2))
+
+            # Index badge below card
+            idx_s = ft.render(str(i + 1), True, MUTED)
+            d.blit(idx_s, (pos[0] + cw // 2 - idx_s.get_width() // 2,
+                           pos[1] + ch + 2))
+
+        # ── Empty-pile notice at bottom of panel ──────────────────────
+        if not self.draw_pile:
+            ep = fs.render("— draw pile exhausted —", True, RED)
+            d.blit(ep, (panel_r.centerx - ep.get_width() // 2,
+                        panel_r.bottom - 18))
 
     def handle_click(self, pos, deck):
-        """Handle a click inside the hand area. Returns action string or None."""
-        for label, br in getattr(self, "_btn_rects", {}).items():
+        for label, br in self._btn_rects.items():
             if br.collidepoint(pos):
                 if "Redraw" in label:
-                    self.redraw(deck)
-                    return "redraw"
+                    self.redraw(deck); return "redraw"
                 elif "Draw" in label:
-                    drew = self.draw_one()
-                    return "drew" if drew else "empty"
+                    return "drew" if self.draw_one() else "empty"
                 elif "Back" in label:
-                    self.close()
-                    return "back"
+                    self.close(); return "back"
         return None
+
 
 # =====================
 # Deck Manager
@@ -605,6 +688,7 @@ class DeckManager:
         self.selector = DeckSelector(display, self.fonts)
         self.hand_sim = HandSimulator(display, self.fonts, self.card_dict)
         self.active_coll_cat = "All"   # collection category filter
+        self._preview_idx = -1              # -1 = no selection; used by arrow keys
 
         self.load_decks()
 
@@ -709,6 +793,7 @@ class DeckManager:
                     for cat, pr in getattr(self, "_coll_cat_pills", []):
                         if pr.collidepoint(e.pos):
                             self.active_coll_cat = cat
+                            self._preview_idx    = -1
                             self.coll_grid.reset_scroll()
                             break
                 if self.hand_sim.active and e.button == 1:
@@ -766,10 +851,26 @@ class DeckManager:
                     if self.hand_sim.active:
                         self.hand_sim.redraw(self.deck)
                         self.set_status("Hand redrawn!")
+                elif e.key == pygame.K_t:
+                    if self.hand_sim.active:
+                        drew = self.hand_sim.draw_one()
+                        if drew:
+                            self.set_status(f"Drew — {len(self.hand_sim.hand)} cards in hand")
+                        else:
+                            self.set_status("Draw pile empty!")
                 elif e.key == pygame.K_b:
                     if self.hand_sim.active:
                         self.hand_sim.close()
                         self.set_status("Back to collection")
+                elif e.key in (pygame.K_LEFT, pygame.K_RIGHT, pygame.K_UP, pygame.K_DOWN):
+                    self._arrow_navigate(e.key)
+                elif e.key == pygame.K_SPACE:
+                    if self.hand_sim.active:
+                        drew = self.hand_sim.draw_one()
+                        if drew:
+                            self.set_status(f"Drew {self.hand_sim.hand[-1]}  —  {len(self.hand_sim.hand)} in hand")
+                        else:
+                            self.set_status("Draw pile empty!")
 
         return True
 
@@ -789,9 +890,63 @@ class DeckManager:
                 return
 
     def _switch_deck(self, idx):
-        self.active_deck = idx
+        self.active_deck  = idx
+        self._preview_idx = -1
         self.deck_grid.reset_scroll()
         self.set_status(f"Switched to {self.deck_name()}")
+
+    def _arrow_navigate(self, key):
+        """Move the preview selection through the collection or hand using arrow keys,
+        and auto-scroll the relevant grid so the selected card stays visible."""
+        if self.hand_sim.active:
+            cards = self.hand_sim.hand
+            # Navigate hand
+            if not cards:
+                return
+            if self._preview_idx < 0:
+                self._preview_idx = 0
+            else:
+                if key == pygame.K_RIGHT:
+                    self._preview_idx = (self._preview_idx + 1) % len(cards)
+                elif key == pygame.K_LEFT:
+                    self._preview_idx = (self._preview_idx - 1) % len(cards)
+            name = cards[self._preview_idx]
+            cd   = self.card_dict(name)
+            if cd:
+                self.preview.set_card(cd, self.deck.get(name, 0))
+        else:
+            filt = self.filtered_collection()
+            if not filt:
+                return
+            cols = CARD_COLS
+            if self._preview_idx < 0:
+                self._preview_idx = 0
+            else:
+                if key == pygame.K_RIGHT:
+                    self._preview_idx = min(self._preview_idx + 1, len(filt) - 1)
+                elif key == pygame.K_LEFT:
+                    self._preview_idx = max(self._preview_idx - 1, 0)
+                elif key == pygame.K_DOWN:
+                    self._preview_idx = min(self._preview_idx + cols, len(filt) - 1)
+                elif key == pygame.K_UP:
+                    self._preview_idx = max(self._preview_idx - cols, 0)
+
+            cd = filt[self._preview_idx]
+            self.preview.set_card(cd, self.deck.get(cd["name"], 0))
+
+            # Auto-scroll collection grid so card is visible
+            row        = self._preview_idx // cols
+            card_top   = row * CARD_CH
+            card_bot   = card_top + CARD_H
+            vis_top    = self.coll_grid.scroll_y
+            vis_bot    = vis_top + self.coll_grid.clip_rect.height
+            if card_top < vis_top:
+                self.coll_grid.scroll_y = clamp(card_top, 0, self.coll_grid._max_scroll)
+            elif card_bot > vis_bot:
+                self.coll_grid.scroll_y = clamp(
+                    card_bot - self.coll_grid.clip_rect.height,
+                    0, self.coll_grid._max_scroll
+                )
 
     # =====================
     # Interactions
@@ -1042,8 +1197,7 @@ class DeckManager:
         cats = ["All"] + sorted(set(c.get("category","") for c in self.collection if c.get("category")))
         pill_x = lx + 160
         for cat in cats:
-            from deck_viewer import CATEGORY_COLORS as CC
-            col    = CC.get(cat, BLUE)
+            col    = CATEGORY_COLORS.get(cat, BLUE)
             active = (cat == self.active_coll_cat)
             pr     = pygame.Rect(pill_x, ly - 1, max(30, self.fonts["tiny"].size(cat)[0] + 10), 18)
             rrect(self.display, (30, 44, 62) if active else PANEL2, pr, r=4)
@@ -1072,6 +1226,11 @@ class DeckManager:
                 ct = self.fonts["small"].render(f"{ind}/{owned}", True, cc)
                 self.display.blit(ct, (pos[0] + CARD_W // 2 - ct.get_width() // 2,
                                        pos[1] + CARD_H - 19))
+                # Arrow-key selection ring
+                if i == self._preview_idx:
+                    rrect(self.display, TEAL,
+                          pygame.Rect(pos[0], pos[1], CARD_W, CARD_H),
+                          r=7, bw=2, bc=TEAL)
         self.coll_grid.draw_clip_end()
 
         self.draw_scrollbar(self.coll_grid,
@@ -1119,9 +1278,8 @@ class DeckManager:
             ("C",   "Clear deck"),
             ("H",   "Hand simulator"),
             ("R",   "Redraw hand"),
-            ("T",   "Draw card"),
-            ("B",   "Back to collection"),
-            ("Arrow Keys",   "Move preview card"),
+            ("SPC", "Draw a card"),
+            ("B",   "Back to coll."),
         ]
         for key, desc in controls:
             if cy + 28 > HEIGHT - 10:
