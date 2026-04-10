@@ -769,9 +769,9 @@ def gametypeMenu():
                 game_type.main()
             
             if event.key == pygame.K_1:
-                print('Starting ladder level 1')
-                import ladder_level1  # Import the game module
-                ladder_level1.main()
+                print('Starting ladder level 0')
+                import ladder_level0  # Import the game module
+                ladder_level0.main()
             if event.key == pygame.K_2:
                 print('Starting 1 round game')
                 import game  # Import the game module

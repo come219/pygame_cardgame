@@ -66,149 +66,8 @@ GRID_H       = HEIGHT - GRID_Y - 60
 # =====================
 # Card categories / image paths
 # =====================
-CARD_CATALOG = [
-    # --- Core Elements ---
-    {"name": "Rock",            "image": "assets/card_rock.png",            "category": "Core", "desc": "The classic. Strong against Scissors and Lizard, weak to Paper and Spock."},
-    {"name": "Paper",           "image": "assets/card_paper.png",           "category": "Core", "desc": "Covers Rock and disproves Spock. Weak to Scissors and Lizard."},
-    {"name": "Scissors",        "image": "assets/card_scissors.png",        "category": "Core", "desc": "Cuts Paper and decapitates Lizard. Weak to Rock and Spock."},
-    {"name": "Snake",           "image": "assets/card_snake.png",           "category": "Core", "desc": "A slithering predator. Strikes swiftly and poisons its foes."},
-    {"name": "Human",           "image": "assets/card_human.png",           "category": "Core", "desc": "The adaptable species. Uses tools and cunning to overcome obstacles."},
-    {"name": "Dragon",          "image": "assets/card_dragon.png",          "category": "Core", "desc": "A mighty beast of fire and fury. Dominates the skies with raw power."},
-    {"name": "Wolf",            "image": "assets/card_wolf.png",            "category": "Core", "desc": "Pack hunter with sharp instincts. Overwhelms foes through teamwork."},
-    {"name": "Devil",           "image": "assets/card_devil.png",           "category": "Core", "desc": "A dark entity of chaos. Corrupts and undermines all who oppose it."},
-    {"name": "Lightning",       "image": "assets/card_lightning.png",       "category": "Core", "desc": "Pure electrical energy. Strikes fast and leaves devastation in its wake."},
-    {"name": "Gun",             "image": "assets/card_gun.png",             "category": "Core", "desc": "Modern firepower. Delivers precise, ranged damage to any target."},
-    {"name": "Fire",            "image": "assets/card_fire.png",            "category": "Core", "desc": "Primal element of destruction. Burns through organic matter with ease."},
-    {"name": "Water",           "image": "assets/card_water.png",           "category": "Core", "desc": "The life-giving element. Extinguishes fire and erodes stone over time."},
-    {"name": "Air",             "image": "assets/card_air.png",             "category": "Core", "desc": "Invisible but powerful. Fuels fire and carries storms across the land."},
-    {"name": "Sponge",          "image": "assets/card_sponge.png",          "category": "Core", "desc": "Absorbent and resilient. Soaks up water and smothers fire."},
-    {"name": "Tree",            "image": "assets/card_tree.png",            "category": "Core", "desc": "Rooted and enduring. Draws strength from earth and shelters life."},
-    {"name": "Lizard",          "image": "assets/card_lizard.png",          "category": "Core", "desc": "Poisons Spock and eats Paper. A cunning reptilian survivor."},
-    {"name": "Spock",           "image": "assets/card_spock.png",           "category": "Core", "desc": "Smashes Scissors and vaporizes Rock. Logic is his greatest weapon."},
-    {"name": "Earth",           "image": "assets/card_earth.png",           "category": "Core", "desc": "The foundation of all. Immovable and enduring against most forces."},
-    {"name": "Metal",           "image": "assets/card_metal.png",           "category": "Core", "desc": "Forged and unyielding. Resists blows and conducts lightning."},
-    {"name": "Bear",            "image": "assets/card_bear.png",            "category": "Core", "desc": "Raw brute strength. Overpowers most creatures in close combat."},
-    {"name": "Computer",        "image": "assets/card_computer.png",        "category": "Core", "desc": "Calculates optimal strategies. Outthinks opponents with pure logic."},
-    {"name": "Balance",         "image": "assets/card_balance.png",         "category": "Core", "desc": "Restores equilibrium. Neutralizes extreme advantages on either side."},
-    {"name": "Void",            "image": "assets/card_void.png",            "category": "Core", "desc": "The absence of everything. Consumes matter and energy alike."},
-    {"name": "Super Paper",     "image": "assets/card_super_paper.png",     "category": "Core", "desc": "An enhanced version of Paper with amplified covering power."},
-    {"name": "Skissors",        "image": "assets/card_skissors.png",        "category": "Core", "desc": "A twisted variant of Scissors. Unpredictable and dangerously sharp."},
-    # --- Toon ---
-    {"name": "Toon Spock",      "image": "assets/card_toon_spock.png",      "category": "Toon", "desc": "A cartoonish Spock. Same logic, but with a playful twist."},
-    {"name": "Toon Snake",      "image": "assets/card_toon_snake.png",      "category": "Toon", "desc": "A goofy serpent from Toon World. Silly but still venomous."},
-    {"name": "Toon Lizard",     "image": "assets/card_toon_lizard.png",     "category": "Toon", "desc": "A comical lizard with big eyes. Don't underestimate its bite."},
-    {"name": "Toon Metal",      "image": "assets/card_toon_metal.png",      "category": "Toon", "desc": "Shiny cartoon metal. Bounces attacks back with a comedic clang."},
-    {"name": "Toon Angel",      "image": "assets/card_toon_angel.png",      "category": "Toon", "desc": "A whimsical angel from Toon World. Heals allies with cartoon magic."},
-    {"name": "Toon Fire",       "image": "assets/card_toon_fire.png",       "category": "Toon", "desc": "Animated flames that dance and giggle. Still burns, though!"},
-    {"name": "Toon Water",      "image": "assets/card_toon_water.png",      "category": "Toon", "desc": "A bubbly splash of cartoon water. Playful but effective."},
-    {"name": "Toon Earth",      "image": "assets/card_toon_earth.png",      "category": "Toon", "desc": "A bouncy cartoon planet. Surprisingly heavy when it lands on you."},
-    {"name": "Toon Dragon",     "image": "assets/card_toon_dragon.png",     "category": "Toon", "desc": "A cute but fierce cartoon dragon. Breathes rainbow fire."},
-    {"name": "Toon Gun",        "image": "assets/card_toon_gun.png",        "category": "Toon", "desc": "A toy-like gun that shoots cork bullets. Comedic but startling."},
-    {"name": "Toon T.O.C.",     "image": "assets/card_toon_table_of_contents.png", "category": "Toon", "desc": "Table of Contents for Toon World. Organizes all toon cards."},
-    {"name": "Toon Bookmark",   "image": "assets/card_toon_bookmark.png",   "category": "Toon", "desc": "Marks a page in Toon World. Lets you return to a saved state."},
-    {"name": "Toon World",      "image": "assets/card_toon_world.png",      "category": "Toon", "desc": "The magical storybook realm. All Toon cards gain power here."},
-    {"name": "Toon Kingdom",    "image": "assets/card_toon_kingdom.png",    "category": "Toon", "desc": "An upgraded Toon World. Protects Toon monsters from destruction."},
-    # --- Special / Rule Cards ---
-    {"name": "No Lose",         "image": "assets/card_no_lose.png",         "category": "Special", "desc": "Prevents you from losing this round. A powerful safety net."},
-    {"name": "Stop Card",       "image": "assets/card_stop_card.png",       "category": "Special", "desc": "Halts the opponent's action for one turn. Buys precious time."},
-    {"name": "Counter Stop",    "image": "assets/card_counter_stop.png",    "category": "Special", "desc": "Negates a Stop Card. Keeps your momentum going."},
-    {"name": "Fundamentals",    "image": "assets/card_fundamentals_only.png","category": "Special", "desc": "Restricts play to core elements only. Strips away all extras."},
-    {"name": "Non-Core",        "image": "assets/card_non_core.png",         "category": "Special", "desc": "Allows only non-core cards to be played this round."},
-    {"name": "Reload",          "image": "assets/card_reload.png",           "category": "Special", "desc": "Refreshes your hand. Draw new cards to replace current ones."},
-    {"name": "Magical Mallet",  "image": "assets/card_magical_mallet.png",   "category": "Special", "desc": "Shuffle chosen cards back into the deck and draw the same number."},
-    {"name": "Jar of Greed",    "image": "assets/card_jar_of_greed.png",     "category": "Special", "desc": "Draw one extra card from your deck. Simple but effective."},
-    
-    
-
-    # --- Exodia ---
-    {"name": "Exodia",          "image": "assets/card_exodia_the_forbidden_one.png", "category": "Exodia", "desc": "The Forbidden One. Collect all pieces to achieve an instant victory."},
-    {"name": "Full Exodia",     "image": "assets/card_full_exodia.png",      "category": "Exodia", "desc": "The complete Exodia assembled. Unleashes unstoppable obliteration."},
-    {"name": "Left Arm",        "image": "assets/card_left_arm_of_exodia.png","category": "Exodia", "desc": "Left Arm of the Forbidden One. One of five pieces needed for Exodia."},
-    {"name": "Right Arm",       "image": "assets/card_right_arm_of_exodia.png","category": "Exodia", "desc": "Right Arm of the Forbidden One. One of five pieces needed for Exodia."},
-    {"name": "Left Leg",        "image": "assets/card_left_leg_of_exodia.png","category": "Exodia", "desc": "Left Leg of the Forbidden One. One of five pieces needed for Exodia."},
-    {"name": "Right Leg",       "image": "assets/card_right_leg_of_exodia.png","category": "Exodia", "desc": "Right Leg of the Forbidden One. One of five pieces needed for Exodia."},
-    {"name": "Tassets",         "image": "assets/card_tassets_of_exodia.png", "category": "Exodia", "desc": "Tassets of Exodia. Protective armor piece of the Forbidden One."},
-    {"name": "Shadow Exodia",   "image": "assets/card_shadow_of_exodia.png",  "category": "Exodia", "desc": "A dark reflection of Exodia. Mimics the Forbidden One's power."},
-    {"name": "Stop Exodia",     "image": "assets/card_stop_exodia.png",       "category": "Exodia", "desc": "Prevents Exodia from being summoned. The ultimate counter."},
-    {"name": "Pot of Greed",    "image": "assets/card_pot_of_greed.png",      "category": "Exodia", "desc": "Draw two additional cards. A staple for any Exodia strategy."},
-
-
-    # --- MOBA cards ---
-    {"name": "Safelane",          "image": "assets/card_aaa_moba_safelane.png", "category": "MOBA", "desc": "The safe path in the game. Provides a secure route for your units."},
-    {"name": "Midlane",          "image": "assets/card_aaa_moba_midlane.png", "category": "MOBA", "desc": "The midlane."},
-    {"name": "Offlane",          "image": "assets/card_aaa_moba_offlane.png", "category": "MOBA", "desc": "The offlane."},
-    {"name": "Soft Support",          "image": "assets/card_aaa_moba_soft_support.png", "category": "MOBA", "desc": "Provides support and utility to teammates."},
-    {"name": "Hard Support",          "image": "assets/card_aaa_moba_hard_support.png", "category": "MOBA", "desc": "Provides heavy support and crowd control to teammates."},
-    
-    {"name": "Tri-lane Support",          "image": "assets/card_aaa_moba_tri_lane_support.png", "category": "MOBA", "desc": "The 3rd support."},
-    {"name": "Sapport",          "image": "assets/card_aaa_moba_sapport.png", "category": "MOBA", "desc": "The sapport."},
-    {"name": "Suicide Lane",          "image": "assets/card_aaa_moba_suicide_lane.png", "category": "MOBA", "desc": "The suicide lane."},
-    {"name": "Death Lane",          "image": "assets/card_aaa_moba_death_lane.png", "category": "MOBA", "desc": "The death lane."},
-    {"name": "Tri-laner",          "image": "assets/card_aaa_moba_tri_laner.png", "category": "MOBA", "desc": "The tri-laner."},
-    
-    {"name": "Jungle",          "image": "assets/card_aaa_moba_jungle.png", "category": "MOBA", "desc": "The role that jungles."},
-    {"name": "Roaming",          "image": "assets/card_aaa_moba_roaming.png", "category": "MOBA", "desc": "The role that roams."},
-    {"name": "Roaming Support",          "image": "assets/card_aaa_moba_roaming.png", "category": "MOBA", "desc": "The role that supports the roaming."},
-    
-
-    {"name": "Marksman",          "image": "assets/card_aaa_moba_marksman.png", "category": "MOBA", "desc": "The marksman."},
-    {"name": "Mid laner",          "image": "assets/card_aaa_moba_mid_laner.png", "category": "MOBA", "desc": "The mid laner."},
-    {"name": "Top laner",          "image": "assets/card_aaa_moba_top_laner.png", "category": "MOBA", "desc": "The top laner."},
-    {"name": "Support",          "image": "assets/card_aaa_moba_support.png", "category": "MOBA", "desc": "The support."},
-    {"name": "Jungler",          "image": "assets/card_aaa_moba_jungler.png", "category": "MOBA", "desc": "The jungler."},
-    {"name": "River",          "image": "assets/card_aaa_moba_river.png", "category": "MOBA", "desc": "The riverer."},
-    
-    
-
-    {"name": "Position 1",          "image": "assets/card_aaa_moba_position_1.png", "category": "MOBA", "desc": "The position 1."},
-    {"name": "Position 2",          "image": "assets/card_aaa_moba_position_2.png", "category": "MOBA", "desc": "The position 2."},
-    {"name": "Position 3",          "image": "assets/card_aaa_moba_position_3.png", "category": "MOBA", "desc": "The position 3."},
-    {"name": "Position 4",          "image": "assets/card_aaa_moba_position_4.png", "category": "MOBA", "desc": "The position 4."},
-    {"name": "Position 5",          "image": "assets/card_aaa_moba_position_5.png", "category": "MOBA", "desc": "The position 5."},
-    {"name": "Position 6",          "image": "assets/card_aaa_moba_position_6.png", "category": "MOBA", "desc": "The position 6."},
-    {"name": "Position 0",          "image": "assets/card_aaa_moba_position_0.png", "category": "MOBA", "desc": "The position 0."},
-    
-    
-
-    
-
-
-    # --- Holy / Units ---
-    {"name": "Holy Knight",     "image": "assets/card_holy_knight.png",      "category": "Units", "desc": "A divine warrior clad in blessed armor. Strikes with holy fury."},
-    {"name": "Holy Archer",     "image": "assets/card_holy_archer.png",      "category": "Units", "desc": "A sacred marksman. Fires arrows of light at distant foes."},
-    {"name": "Holy Mage",       "image": "assets/card_holy_mage.png",        "category": "Units", "desc": "A priest of arcane power. Casts healing and offensive miracles."},
-    {"name": "Castle",          "image": "assets/card_castle.png",           "category": "Units", "desc": "A fortified stronghold. Provides defense and rallies nearby units."},
-    {"name": "Keep",            "image": "assets/card_keep.png",             "category": "Units", "desc": "The inner fortress. Last line of defense with reinforced walls."},
-    {"name": "Footman",         "image": "assets/card_footman.png",          "category": "Units", "desc": "A reliable infantry soldier. Holds the front line with shield and sword."},
-    {"name": "Rifleman",        "image": "assets/card_rifleman.png",         "category": "Units", "desc": "A ranged combatant with a rifle. Picks off enemies from a distance."},
-    {"name": "Knight",          "image": "assets/card_knight.png",           "category": "Units", "desc": "A mounted warrior. Charges into battle with devastating momentum."},
-    {"name": "Stronghold",      "image": "assets/card_stronghold.png",       "category": "Units", "desc": "A massive fortification. Nearly impenetrable and boosts garrison morale."},
-    {"name": "Grunt",           "image": "assets/card_grunt.png",            "category": "Units", "desc": "A basic but fierce orc warrior. Fights with raw aggression."},
-    {"name": "Burrow",          "image": "assets/card_burrow.png",           "category": "Units", "desc": "An underground hideout. Conceals units and enables surprise attacks."},
-    {"name": "Ghoul",           "image": "assets/card_ghoul.png",            "category": "Units", "desc": "An undead scavenger. Regenerates health by consuming fallen foes."},
-    {"name": "Blue Eyes Dragon","image": "assets/card_blue_eyes_white_dragon.png","category": "Units", "desc": "The legendary Blue-Eyes White Dragon. Devastating burst stream of destruction."},
-    {"name": "Red Eyes Dragon", "image": "assets/card_red_eyes_black_dragon.png", "category": "Units", "desc": "The fierce Red-Eyes Black Dragon. Inferno fire blast incinerates all."},
-    {"name": "Moon Champion",   "image": "assets/card_moon_champion.png",    "category": "Units", "desc": "A warrior empowered by moonlight. Grows stronger as night falls."},
-    {"name": "Lunar Soldier",   "image": "assets/card_soldier_of_lunar_light.png","category": "Units", "desc": "A soldier blessed by the moon. Fights with ethereal lunar energy."},
-    {"name": "Void Bard",       "image": "assets/card_void_bard.png",        "category": "Units", "desc": "A musician of the void. Plays haunting melodies that weaken enemies."},
-    # --- Spells / Traps ---
-    {"name": "Trap Stun",       "image": "assets/card_trap_stun.png",        "category": "Spells", "desc": "Negates all trap cards for this turn. Clears the way for your play."},
-    {"name": "Barbed Armour",   "image": "assets/card_barbed_armour.png",    "category": "Spells", "desc": "Reflects a portion of damage back to the attacker. Punishes aggression."},
-    {"name": "Swords of Hope",  "image": "assets/swords_of_hope_card.png",   "category": "Spells", "desc": "Protective swords that shield you. Stalls the opponent for multiple turns."},
-    {"name": "Whip",            "image": "assets/whip_card.png",             "category": "Spells", "desc": "A swift lashing attack. Deals damage and reduces enemy defense."},
-    {"name": "Silence",         "image": "assets/silence_card.png",          "category": "Spells", "desc": "Mutes the opponent's special abilities for one turn. Pure suppression."},
-    {"name": "Greater Axe",     "image": "assets/greater_axe_card.png",      "category": "Spells", "desc": "A massive enchanted axe. Boosts attack power significantly."},
-    {"name": "Black Hole",      "image": "assets/blackhole_card.png",        "category": "Spells", "desc": "Destroys all cards on the field. A devastating reset for both sides."},
-    {"name": "Mystical Typhoon","image": "assets/mysticalspacetypoon_card.png","category": "Spells", "desc": "Destroys one spell or trap card on the field. Precise removal."},
-    # --- AA (Action Arena) ---
-    {"name": "AA Shoot",        "image": "assets/card_aa_shoot.png",         "category": "AA", "desc": "Fire your weapon in the Action Arena. Deals direct damage."},
-    {"name": "AA Reload",       "image": "assets/card_aa_reload.png",        "category": "AA", "desc": "Reload your ammunition. Required before you can shoot again."},
-    {"name": "AA Block",        "image": "assets/card_aa_block.png",         "category": "AA", "desc": "Raise your shield to block an incoming shot. Negates damage."},
-    {"name": "AA Can't Shoot",  "image": "assets/card_aa_cant_shoot.png",    "category": "AA", "desc": "Prevents the opponent from shooting next turn. Tactical denial."},
-    {"name": "AA Reflect Shot", "image": "assets/card_aa_reflect_shot.png",  "category": "AA", "desc": "Reflects an incoming shot back at the attacker. Risky but rewarding."},
-    {"name": "AA Extra Heart",  "image": "assets/card_aa_extra_heart.png",   "category": "AA", "desc": "Grants one additional life point. Extends your survival in the arena."},
-    {"name": "AA Reset",        "image": "assets/card_aa_reset_players.png", "category": "AA", "desc": "Resets both players to their starting state. A full arena restart."},
-]
+import cards
+CARD_CATALOG = cards.ALL_CARDS
 
 CATEGORIES = ["All", "Core", "Toon", "Special", "Exodia", "Units", "Spells", "AA"]
 
@@ -635,6 +494,9 @@ class CardViewer:
             ("1–7",   "Jump to cat"),
             ("Scroll","Browse cards"),
             ("Click", "Preview card"),
+            ("F","Filter Cards - ID, Alphabetical, Rarity, Quality"),
+            ("X","Random Card"),
+
         ]
         for key, desc in controls:
             kr = pygame.Rect(sx + 6, cy, 34, 20)

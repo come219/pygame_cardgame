@@ -1,9 +1,17 @@
 [Deck A]
-  Rock x1
+  Hard Support x1
+  Midlane x1
+  Offlane x1
+  Safelane x1
+  Soft Support x1
 
 [Deck B]
-  Paper x2
-  Scissors x2
+  Ace of Clubs x2
+  Ace of Diamonds x2
+  Ace of Hearts x2
+  Ace of Spades x2
 
 [Deck C]
-  (empty)
+  AA Block x2
+  AA Reload x2
+  AA Shoot x2
