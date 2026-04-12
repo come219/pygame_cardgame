@@ -11,6 +11,16 @@ WIDTH, HEIGHT = display_Width, display_Height
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Balanced Card Game | Story Mode 1")
 
+image_path = "assets/ladder_level1.png"
+image_path_rock = "assets/ladder_level1_rock.png"
+image_path_paper = "assets/ladder_level1_paper.png"
+image_path_scissors = "assets/ladder_level1_scissors.png"
+image_path_won = "assets/ladder_level1_won.png"
+image_path_lost = "assets/ladder_level1_lost.png"
+image_path_win = "assets/ladder_level1_win.png"
+image_path_lose = "assets/ladder_level1_lose.png"
+image_path_draw = "assets/ladder_level1_draw.png"
+
 # Colors
 WHITE = (255, 255, 255)
 GREY=  (128,128,128)

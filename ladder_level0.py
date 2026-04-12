@@ -11,6 +11,9 @@ WIDTH, HEIGHT = display_Width, display_Height
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Balanced Card Game | Story Mode 1")
 
+image_path = "assets/ladder_level0.png"
+image_path_claimed = "assets/ladder_level0_claimed.png"
+
 # Colors
 WHITE = (255, 255, 255)
 GREY=  (128,128,128)
@@ -84,9 +87,22 @@ def main():
         screen.blit(rock_img, (     WIDTH/2 - 500 + 100, HEIGHT - 700))
         screen.blit(paper_img, (    WIDTH/2 - 500 + 325, HEIGHT - 700))
         screen.blit(scissors_img, ( WIDTH/2 - 500 + 550, HEIGHT - 700))
+        
 
         display_text("Menu", GREY, 20, 4)
         pygame.draw.rect(screen, GREY, (WIDTH / 2 - 180, 150, 150, 150))
+        
+        ladder_image = pygame.image.load(image_path)
+        ladder_image = pygame.transform.scale(ladder_image, (150, 150))
+
+        ladder_image_claimed = pygame.image.load(image_path_claimed)
+        ladder_image_claimed = pygame.transform.scale(ladder_image_claimed, (150, 150))
+
+        if not claimed:
+            screen.blit(ladder_image, (WIDTH / 2 - 180, 150,))
+        else:
+            screen.blit(ladder_image_claimed, (WIDTH / 2 - 180, 150,))
+
         display_text("Ladder Level 0: Grandpa's Cards", GREY, WIDTH /2 - 200, 4)
         display_text('"Here are your cards,', WHITE, WIDTH /2, 200)
 

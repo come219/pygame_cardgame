@@ -178,6 +178,7 @@ traditionalroundImg = pygame.image.load('assets/traditional_round_image.png').co
 classic_roundImg = pygame.image.load('assets/classic_game_image.png').convert()
 extended_roundImg = pygame.image.load('assets/extended_round_image.png').convert()
 online_roundImg = pygame.image.load('assets/online_game_image.png').convert()
+join_room_img = pygame.image.load('assets/join_room_image.png').convert()
 dice_roller_Img = pygame.image.load('assets/dice_roller_image.png').convert()
 spock_roundImg = pygame.image.load('assets/spock_round_image.png').convert()
 
@@ -264,6 +265,11 @@ pass
 
 def onlineroundicon(x, y):
     small_img = pygame.transform.scale(online_roundImg, (400, 600))  # Resize the image to 100x100
+    gameDisplay.blit(small_img, (x, y))
+pass
+
+def join_room_icon(x, y):
+    small_img = pygame.transform.scale(join_room_img, (400, 600))  # Resize the image to 100x100
     gameDisplay.blit(small_img, (x, y))
 pass
 
@@ -843,7 +849,8 @@ def gametypeMenu():
     storymodeicon(80, 230)          # storymode
     oneroundicon(540, 230)          # one round mode
     traditionalroundicon(980, 230)  # traditional mode
-    onlineroundicon (1440, 230)     # online mode
+    # onlineroundicon (1440, 230)     # online mode
+    join_room_icon(1440, 230)          # join room
 
 
     if selected_deck == 1:

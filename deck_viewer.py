@@ -508,7 +508,7 @@ class HandSimulator:
             self._card_positions.append((ox + c * (cw + 8), oy + r * row_h))
 
     # ------------------------------------------------------------------
-    def draw_area(self, draw_card_widget_fn):
+    def draw_area(self, draw_card_widget_fn, selected_idx=-1):
         d  = self.display
         fs = self.fonts["small"]
         fn = self.fonts["normal"]
@@ -620,6 +620,10 @@ class HandSimulator:
                     nt = ft.render("NEW", True, BG)
                     d.blit(nt, (nb.x + nb.w // 2 - nt.get_width() // 2,
                                 nb.y + nb.h // 2 - nt.get_height() // 2))
+
+                # Arrow-key selection ring
+                if i == selected_idx:
+                    rrect(d, TEAL, pygame.Rect(rx, ry, cw, ch), r=6, bw=2, bc=TEAL)
 
             # Index badge below card
             idx_s = ft.render(str(i + 1), True, MUTED)
@@ -875,6 +879,19 @@ class DeckManager:
         return True
 
     def _update_preview_hover(self, pos):
+        # When hand simulator is active, hover over hand cards instead of collection
+        if self.hand_sim.active:
+            cw, ch = getattr(self.hand_sim, "_card_size", (CARD_W, CARD_H))
+            for i, (name, hpos) in enumerate(zip(self.hand_sim.hand, self.hand_sim._card_positions)):
+                hx, hy = hpos
+                if hx <= pos[0] <= hx + cw and hy <= pos[1] <= hy + ch:
+                    cd = self.card_dict(name)
+                    if cd:
+                        self.preview.set_card(cd, self.deck.get(name, 0))
+                        self._preview_idx = i
+                    return
+            return  # don't fall through to collection when hand sim is active
+
         for i, cd in enumerate(self.collection):
             cx, cy = self.coll_grid.card_pos(i)
             if (cx <= pos[0] <= cx + CARD_W and cy <= pos[1] <= cy + CARD_H
@@ -888,7 +905,6 @@ class DeckManager:
                     and self.deck_grid.clip_rect.collidepoint(pos)):
                 self.preview.set_card(self.card_dict(name), self.deck.get(name, 0))
                 return
-
     def _switch_deck(self, idx):
         self.active_deck  = idx
         self._preview_idx = -1
@@ -1366,7 +1382,7 @@ class DeckManager:
         self.draw_tabs()
         self.draw_deck_area()
         if self.hand_sim.active:
-            self.hand_sim.draw_area(self.draw_card_widget)
+            self.hand_sim.draw_area(self.draw_card_widget, selected_idx=self._preview_idx)
         else:
             self.draw_collection_area()
         self.draw_sidebar()

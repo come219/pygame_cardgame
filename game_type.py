@@ -274,7 +274,7 @@ def main():
 
         pygame.draw.rect(screen, LIGHT_GREY, ((WIDTH - 450), 80, 80, 80))    
         display_text(f"Player", BLUE, WIDTH - 350, 80)
-        display_text(f"Balance :\$0.00", GREEN, WIDTH - 350, 140)
+        display_text(f"Balance: $0.00", GREEN, WIDTH - 350, 140)
         pygame.draw.rect(screen, LIGHT_GREY, ((WIDTH/2 - 250), 80, 80, 80))   
         pygame.draw.rect(screen, LIGHT_GREY, ((WIDTH/2 + 150), 80, 80, 80))  
         display_text(f"Page {CURRENT_PAGE} / 20", BLUE, (WIDTH / 2) - 100, 80)
@@ -282,7 +282,7 @@ def main():
         display_text(f">", BLUE, (WIDTH / 2 + 270) - 100, 80)
 
 
-        display_text(f"Menu", BLUE, 50, 4)
+        display_text(f"ESC - Menu", BLUE, 50, 4)
 
 
         # event check

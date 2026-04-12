@@ -26,6 +26,7 @@ BG            = (12,  14,  20)
 PANEL         = (20,  24,  34)
 PANEL2        = (26,  30,  42)
 BORDER        = (38,  46,  64)
+BORDER_HI     = (60,  80, 120)
 CARD_BG       = (30,  36,  50)
 CARD_HOV      = (44,  54,  76)
 CARD_BORD     = (50,  62,  88)
@@ -65,15 +66,16 @@ CARD_CH    = CARD_H + CARD_GAP
 COLS       = 9
 STATUS_DUR = 180
 
-GRID_X = PAD
-GRID_Y = 60
-GRID_W = SIDEBAR_X - GRID_X - PAD
-GRID_H = HEIGHT - GRID_Y - 60
+GRID_X      = PAD
+GRID_Y      = 60       # top of the panel
+GRID_W      = SIDEBAR_X - GRID_X - PAD
+GRID_H      = HEIGHT - GRID_Y - 60
+HEADER_H    = 34       # height of the in-panel label/pill row
+GRID_CLIP_Y = GRID_Y + HEADER_H + 8   # where cards start
 
 import cards
 CARD_CATALOG = cards.ALL_CARDS
 CATEGORIES   = ["All", "Core", "Toon", "Special", "Exodia", "Units", "Spells", "AA"]
-
 SORT_MODES   = ["Default", "A→Z", "Z→A", "Value ↑", "Value ↓"]
 
 
@@ -105,7 +107,6 @@ def wrap_text(font, text, max_w):
     return lines
 
 def draw_value_orb(surf, value, cx, cy, accent, font, orb_r=18):
-    """Draw a concentric-ring orb with numeric value centred inside."""
     pygame.draw.circle(surf, accent,  (cx, cy), orb_r)
     pygame.draw.circle(surf, PANEL2,  (cx, cy), orb_r - 3)
     pygame.draw.circle(surf, accent,  (cx, cy), orb_r - 7)
@@ -166,6 +167,18 @@ class CardGrid:
                 return i
         return None
 
+    def ensure_visible(self, idx):
+        """Scroll so that card at idx is fully visible."""
+        row      = idx // self.cols
+        card_top = row * CARD_CH
+        card_bot = card_top + CARD_H
+        vis_top  = self.scroll_y
+        vis_bot  = vis_top + self.clip_rect.height
+        if card_top < vis_top:
+            self.scroll_y = clamp(card_top, 0, self._max_scroll)
+        elif card_bot > vis_bot:
+            self.scroll_y = clamp(card_bot - self.clip_rect.height, 0, self._max_scroll)
+
     def draw_clip_start(self): self.display.set_clip(self.clip_rect)
     def draw_clip_end(self):   self.display.set_clip(None)
 
@@ -192,6 +205,7 @@ class CardViewer:
         self.sort_mode     = "Default"
         self.filtered      = list(self.all_cards)
         self.selected_card = None
+        self.cursor_idx    = -1   # -1 = no keyboard cursor active
 
         self.status        = ""
         self.status_timer  = 0
@@ -199,28 +213,40 @@ class CardViewer:
         self.sidebar_scroll_y    = 0
         self._sidebar_max_scroll = 0
 
-        grid_clip = pygame.Rect(GRID_X, GRID_Y + 50, GRID_W, GRID_H - 50)
+        # Nav mode: "mouse" or "keys" — keys mode shows cursor ring
+        self._nav_mode = "mouse"
+
+        grid_clip = pygame.Rect(GRID_X, GRID_CLIP_Y, GRID_W,
+                               HEIGHT - GRID_CLIP_Y - 20)
         self.grid = CardGrid(display, grid_clip, cols=COLS)
 
-        self._build_cat_tabs()
-        self._build_sort_tabs()
+        # Pill rects built each frame in _build_pill_rects()
+        self._cat_pill_rects  = {}
+        self._sort_pill_rects = {}
 
     # ------------------------------------------------------------------
-    def _build_cat_tabs(self):
-        tw, th, tg = 110, 34, 6
-        self.cat_tabs = {
-            cat: pygame.Rect(GRID_X + i * (tw + tg), GRID_Y + 8, tw, th)
-            for i, cat in enumerate(CATEGORIES)
-        }
+    def _build_pill_rects(self):
+        fn  = self.fonts["tiny"]
+        ph  = 20
+        gap = 5
+        py  = GRID_Y + (HEADER_H - ph) // 2 + 2
 
-    def _build_sort_tabs(self):
-        tw, th, tg = 90, 24, 5
-        # Place sort tabs to the right of category tabs, aligned top-right of grid
-        start_x = SIDEBAR_X - len(SORT_MODES) * (tw + tg) - PAD
-        self.sort_tabs = {
-            m: pygame.Rect(start_x + i * (tw + tg), GRID_Y + 16, tw, th)
-            for i, m in enumerate(SORT_MODES)
-        }
+        px = GRID_X
+        self._cat_pill_rects = {}
+        for cat in CATEGORIES:
+            pw = max(32, fn.size(cat)[0] + 14)
+            self._cat_pill_rects[cat] = pygame.Rect(px, py, pw, ph)
+            px += pw + gap
+
+        # Sort pills — right-aligned
+        total_sw = sum(max(32, fn.size(m)[0] + 10) for m in SORT_MODES)
+        total_sw += 4 * (len(SORT_MODES) - 1)
+        sx = GRID_X + GRID_W - total_sw - 18
+        self._sort_pill_rects = {}
+        for mode in SORT_MODES:
+            pw = max(32, fn.size(mode)[0] + 10)
+            self._sort_pill_rects[mode] = pygame.Rect(sx, py, pw, ph)
+            sx += pw + 4
 
     def _apply_filter_sort(self):
         base = (self.all_cards if self.active_cat == "All"
@@ -233,7 +259,8 @@ class CardViewer:
             base = sorted(base, key=lambda c: c.get("value", 0))
         elif self.sort_mode == "Value ↓":
             base = sorted(base, key=lambda c: c.get("value", 0), reverse=True)
-        self.filtered = base
+        self.filtered  = base
+        self.cursor_idx = -1
         self.grid.reset_scroll()
 
     def set_category(self, cat):
@@ -248,9 +275,21 @@ class CardViewer:
 
     def pick_random(self):
         if self.filtered:
-            self.selected_card = random.choice(self.filtered)
+            idx = random.randrange(len(self.filtered))
+            self._set_cursor(idx)
             self.sidebar_scroll_y = 0
-            self.set_status(f"Random: {self.selected_card['name']}")
+            self.set_status(f"Random: {self.filtered[idx]['name']}")
+
+    def _set_cursor(self, idx):
+        """Set keyboard cursor and selected card, auto-scroll grid."""
+        if not self.filtered:
+            return
+        idx = clamp(idx, 0, len(self.filtered) - 1)
+        self.cursor_idx    = idx
+        self.selected_card = self.filtered[idx]
+        self.sidebar_scroll_y = 0
+        self.grid.update_max_scroll(len(self.filtered))
+        self.grid.ensure_visible(idx)
 
     def set_status(self, msg):
         self.status       = msg
@@ -270,6 +309,10 @@ class CardViewer:
             if e.type == pygame.QUIT:
                 return False
 
+            elif e.type == pygame.MOUSEMOTION:
+                # Switch to mouse mode on any movement
+                self._nav_mode = "mouse"
+
             elif e.type == pygame.MOUSEWHEEL:
                 mx, my = pygame.mouse.get_pos()
                 sb = pygame.Rect(SIDEBAR_X - 8, 0, SIDEBAR_W, HEIGHT)
@@ -283,51 +326,151 @@ class CardViewer:
 
             elif e.type == pygame.MOUSEBUTTONDOWN and e.button == 1:
                 pos = e.pos
-                # Category tabs
-                for cat, rect in self.cat_tabs.items():
+                for cat, rect in self._cat_pill_rects.items():
                     if rect.collidepoint(pos):
                         self.set_category(cat); break
                 else:
-                    # Sort tabs
-                    for mode, rect in self.sort_tabs.items():
+                    for mode, rect in self._sort_pill_rects.items():
                         if rect.collidepoint(pos):
                             self.set_sort(mode); break
                     else:
                         idx = self.grid.card_at(pos, len(self.filtered))
                         if idx is not None:
-                            self.selected_card    = self.filtered[idx]
+                            self._nav_mode = "mouse"
+                            self.cursor_idx    = idx
+                            self.selected_card = self.filtered[idx]
                             self.sidebar_scroll_y = 0
                             self.set_status(f"Viewing: {self.selected_card['name']}")
 
             elif e.type == pygame.KEYDOWN:
-                if e.key == pygame.K_ESCAPE:
-                    if HAS_CARDGAME: cardgame.main()
-                    return False
-                elif e.key == pygame.K_d:
-                    if HAS_DECK_MANAGER: deck_manager.main()
-                    return False
-                elif e.key == pygame.K_r:
-                    self.selected_card = None
-                    self.set_category("All")
-                    self.sort_mode = "Default"
-                    self.set_status("Reset")
-                elif e.key == pygame.K_x:
-                    self.pick_random()
-                elif e.key == pygame.K_LEFT:
-                    cats = CATEGORIES
-                    self.set_category(cats[(cats.index(self.active_cat) - 1) % len(cats)])
-                elif e.key == pygame.K_RIGHT:
-                    cats = CATEGORIES
-                    self.set_category(cats[(cats.index(self.active_cat) + 1) % len(cats)])
-                elif e.key == pygame.K_f:
-                    # Cycle sort modes
-                    idx = SORT_MODES.index(self.sort_mode)
-                    self.set_sort(SORT_MODES[(idx + 1) % len(SORT_MODES)])
-                for ki, cat in enumerate(CATEGORIES[1:], 1):
-                    if e.key == getattr(pygame, f"K_{ki}", None):
-                        self.set_category(cat)
+                self._handle_keydown(e)
 
         return True
+
+    def _handle_keydown(self, e):
+        # ── Navigation keys switch to key mode ──────────────────────
+        arrow_keys = (pygame.K_LEFT, pygame.K_RIGHT, pygame.K_UP, pygame.K_DOWN)
+
+        if e.key in arrow_keys:
+            self._nav_mode = "keys"
+            self._arrow_navigate(e.key)
+            return
+
+        if e.key == pygame.K_RETURN or e.key == pygame.K_SPACE:
+            # Confirm selection at cursor
+            if self.cursor_idx >= 0 and self.filtered:
+                self.selected_card    = self.filtered[self.cursor_idx]
+                self.sidebar_scroll_y = 0
+                self.set_status(f"Viewing: {self.selected_card['name']}")
+            return
+
+        if e.key == pygame.K_HOME:
+            self._nav_mode = "keys"
+            self._set_cursor(0)
+            self.set_status("First card")
+            return
+
+        if e.key == pygame.K_END:
+            self._nav_mode = "keys"
+            self._set_cursor(len(self.filtered) - 1)
+            self.set_status("Last card")
+            return
+
+        if e.key == pygame.K_PAGEDOWN:
+            self._nav_mode = "keys"
+            step = COLS * max(1, self.grid.clip_rect.height // CARD_CH)
+            self._set_cursor(self.cursor_idx + step)
+            return
+
+        if e.key == pygame.K_PAGEUP:
+            self._nav_mode = "keys"
+            step = COLS * max(1, self.grid.clip_rect.height // CARD_CH)
+            self._set_cursor(self.cursor_idx - step)
+            return
+
+        if e.key == pygame.K_ESCAPE:
+            if HAS_CARDGAME: cardgame.main()
+            return
+
+        if e.key == pygame.K_d:
+            if HAS_DECK_MANAGER: deck_manager.main()
+            return
+
+        if e.key == pygame.K_r:
+            self.selected_card = None
+            self.cursor_idx    = -1
+            self._nav_mode     = "mouse"
+            self.set_category("All")
+            self.sort_mode = "Default"
+            self.set_status("Reset")
+            return
+
+        if e.key == pygame.K_x:
+            self._nav_mode = "keys"
+            self.pick_random()
+            return
+
+        if e.key == pygame.K_f:
+            idx = SORT_MODES.index(self.sort_mode)
+            self.set_sort(SORT_MODES[(idx + 1) % len(SORT_MODES)])
+            return
+
+        if e.key == pygame.K_TAB:
+            # Cycle categories forward (shift+tab = backward)
+            mods = pygame.key.get_mods()
+            cats = CATEGORIES
+            idx  = cats.index(self.active_cat)
+            if mods & pygame.KMOD_SHIFT:
+                self.set_category(cats[(idx - 1) % len(cats)])
+            else:
+                self.set_category(cats[(idx + 1) % len(cats)])
+            return
+
+        # Left/right for category switching (only when NOT in keys nav mode)
+        if self._nav_mode == "mouse":
+            if e.key == pygame.K_LEFT:
+                cats = CATEGORIES
+                self.set_category(cats[(cats.index(self.active_cat) - 1) % len(cats)])
+                return
+            if e.key == pygame.K_RIGHT:
+                cats = CATEGORIES
+                self.set_category(cats[(cats.index(self.active_cat) + 1) % len(cats)])
+                return
+
+        # Number keys: jump to category
+        for ki, cat in enumerate(CATEGORIES[1:], 1):
+            if e.key == getattr(pygame, f"K_{ki}", None):
+                self.set_category(cat)
+                return
+
+    def _arrow_navigate(self, key):
+        """Move keyboard cursor through the grid."""
+        if not self.filtered:
+            return
+
+        count = len(self.filtered)
+        cols  = COLS
+
+        # If no cursor yet, start at 0
+        if self.cursor_idx < 0:
+            self._set_cursor(0)
+            self.set_status(f"{self.filtered[0]['name']}")
+            return
+
+        idx = self.cursor_idx
+
+        if key == pygame.K_RIGHT:
+            idx = min(idx + 1, count - 1)
+        elif key == pygame.K_LEFT:
+            idx = max(idx - 1, 0)
+        elif key == pygame.K_DOWN:
+            idx = min(idx + cols, count - 1)
+        elif key == pygame.K_UP:
+            idx = max(idx - cols, 0)
+
+        if idx != self.cursor_idx:
+            self._set_cursor(idx)
+            self.set_status(f"{self.filtered[idx]['name']}")
 
     # =====================
     # Drawing helpers
@@ -351,34 +494,55 @@ class CardViewer:
         thumb_y = r.top + int((r.height - thumb_h) * frac)
         rrect(self.display, TEAL, pygame.Rect(r.right + 4, thumb_y, 5, thumb_h), r=2)
 
-    def draw_category_tabs(self):
-        for cat, rect in self.cat_tabs.items():
+    def draw_pills(self):
+        """Draw category pills and sort pills inside the panel header row."""
+        fn  = self.fonts["tiny"]
+        mx, my = pygame.mouse.get_pos()
+
+        # ── Category pills ────────────────────────────────────────────
+        for cat, rect in self._cat_pill_rects.items():
             active  = (cat == self.active_cat)
             col     = CATEGORY_COLORS.get(cat, BLUE)
-            bg      = (28, 40, 60) if active else PANEL
-            bord    = col if active else BORDER
-            rrect(self.display, bg, rect, r=7)
-            rrect(self.display, bord, rect, r=7, bw=2 if active else 1)
-            s = self.fonts["small"].render(cat, True, WHITE if active else MUTED)
-            self.display.blit(s, (rect.centerx - s.get_width() // 2,
-                                  rect.centery - s.get_height() // 2))
-
-    def draw_sort_tabs(self):
-        for mode, rect in self.sort_tabs.items():
-            active = (mode == self.sort_mode)
-            col    = AMBER if active else BORDER
-            bg     = (38, 34, 18) if active else PANEL
+            hov     = rect.collidepoint(mx, my) and not active
+            bg      = (28, 40, 62) if active else ((32, 40, 56) if hov else PANEL2)
+            bord    = col if active else (BORDER_HI if hov else BORDER)
             rrect(self.display, bg, rect, r=5)
-            rrect(self.display, col, rect, r=5, bw=1)
-            s = self.fonts["tiny"].render(mode, True, AMBER if active else MUTED)
+            rrect(self.display, bord, rect, r=5, bw=2 if active else 1)
+            tc = WHITE if active else (MUTED if not hov else (col[0]//2+128, col[1]//2+128, col[2]//2+128))
+            s = fn.render(cat, True, tc)
+            self.display.blit(s, (rect.centerx - s.get_width() // 2,
+                                  rect.centery - s.get_height() // 2))
+            # small count dot on active pill
+            if active:
+                cnt_s = pygame.font.Font(None, 14).render(str(len(self.filtered)), True, col)
+                self.display.blit(cnt_s, (rect.right - cnt_s.get_width() - 2, rect.top + 1))
+
+        # ── Sort pills ────────────────────────────────────────────────
+        for mode, rect in self._sort_pill_rects.items():
+            active = (mode == self.sort_mode)
+            hov    = rect.collidepoint(mx, my) and not active
+            bg     = (40, 36, 18) if active else ((32, 30, 18) if hov else PANEL2)
+            bord   = AMBER if active else (BORDER_HI if hov else BORDER)
+            rrect(self.display, bg, rect, r=5)
+            rrect(self.display, bord, rect, r=5, bw=2 if active else 1)
+            tc = AMBER if active else (MUTED if not hov else (200, 170, 90))
+            s = fn.render(mode, True, tc)
             self.display.blit(s, (rect.centerx - s.get_width() // 2,
                                   rect.centery - s.get_height() // 2))
 
-    def draw_card_tile(self, card, pos, hovered=False):
+    def draw_card_tile(self, card, idx, pos, hovered=False):
         rx, ry  = pos
-        bg      = CARD_HOV if hovered else CARD_BG
-        bord    = CARD_BORD_ACT if hovered else CARD_BORD
-        r       = pygame.Rect(rx, ry, CARD_W, CARD_H)
+        is_cursor   = (self._nav_mode == "keys" and idx == self.cursor_idx)
+        is_selected = (self.selected_card and self.selected_card["name"] == card["name"])
+
+        if is_cursor:
+            bg, bord = CARD_HOV, CARD_BORD_ACT
+        elif hovered:
+            bg, bord = CARD_HOV, CARD_BORD_ACT
+        else:
+            bg, bord = CARD_BG, CARD_BORD
+
+        r = pygame.Rect(rx, ry, CARD_W, CARD_H)
         rrect(self.display, bg, r, r=7)
         rrect(self.display, bord, r, r=7, bw=1)
 
@@ -390,40 +554,71 @@ class CardViewer:
         img = load_image(card["image"], CARD_W - 4, CARD_H - 24)
         self.display.blit(img, (rx + 2, ry + 6))
 
-        # Value orb — bottom-left corner of tile
         value = card.get("value", None)
         if value is not None:
             draw_value_orb(self.display, value,
                            rx + 14, ry + CARD_H - 14,
                            cat_col, self.fonts["tiny"], orb_r=11)
 
-        # Name label
         ns = self.fonts["small"].render(card["name"], True, WHITE)
         if ns.get_width() > CARD_W - 28:
             ns = self.fonts["tiny"].render(card["name"], True, WHITE)
         self.display.blit(ns, (rx + CARD_W // 2 - ns.get_width() // 2 + 6,
                                ry + CARD_H - 16))
 
-        # Selected ring
-        if self.selected_card and self.selected_card["name"] == card["name"]:
+        # Selection ring (teal = selected/confirmed, white pulse = cursor)
+        if is_selected and is_cursor:
+            rrect(self.display, TEAL, r, r=7, bw=3, bc=TEAL)
+        elif is_selected:
             rrect(self.display, TEAL, r, r=7, bw=2, bc=TEAL)
+        elif is_cursor:
+            # Animated pulse: brightness oscillates
+            t   = pygame.time.get_ticks()
+            alpha = int(160 + 80 * abs((t % 800) / 400 - 1))
+            pulse_col = (min(255, BLUE[0] + 40), min(255, BLUE[1] + 40), min(255, BLUE[2] + 40))
+            rrect(self.display, pulse_col, r, r=7, bw=2, bc=pulse_col)
+
+            # Small arrow indicator above cursor card (only in key mode)
+            ax, ay = rx + CARD_W // 2, ry - 6
+            pygame.draw.polygon(self.display, BLUE,
+                                [(ax, ay + 6), (ax - 6, ay), (ax + 6, ay)])
 
     def draw_grid(self):
         count = len(self.filtered)
         self.grid.update_max_scroll(count)
 
+        # Outer panel (full area)
         panel_r = pygame.Rect(GRID_X - PAD, GRID_Y - 4,
-                              GRID_W + PAD + 18, GRID_H + 60)
+                              GRID_W + PAD + 18, HEIGHT - GRID_Y + 4)
         panel(self.display, panel_r, r=10)
 
-        lx, ly = GRID_X, GRID_Y - PAD + 56 + 14
-        col = CATEGORY_COLORS.get(self.active_cat, BLUE)
-        self._txt(self.active_cat.upper(), lx, ly - 36, col, "small")
-        self._txt(f"{count} cards", lx + 60, ly - 36, MUTED, "small")
-        if self.sort_mode != "Default":
-            self._txt(f"↕ {self.sort_mode}", lx + 130, ly - 36, AMBER, "small")
+        # Header row background
+        hdr_r = pygame.Rect(panel_r.x + 1, panel_r.y + 1,
+                            panel_r.w - 2, HEADER_H + 8)
+        rrect(self.display, PANEL2, hdr_r, r=9)
+
+        # Build + draw pills (category left, sort right)
+        self._build_pill_rects()
+        self.draw_pills()
+
+        # Separator below header
+        sep_y = GRID_CLIP_Y - 4
+        pygame.draw.line(self.display, BORDER,
+                         (panel_r.x + 4, sep_y), (panel_r.right - 4, sep_y), 1)
+
+        # Scroll hint + nav indicator (top-right of header)
+        hint_x = panel_r.right - 80
+        hint_y = GRID_Y + (HEADER_H - 14) // 2 + 2
         if self.grid._max_scroll > 0:
-            self._txt("scroll ↕", panel_r.right - 72, ly - 36, DIM, "small")
+            self._txt("scroll ↕", hint_x, hint_y, DIM, "tiny")
+        if self._nav_mode == "keys" and self.cursor_idx >= 0:
+            row        = self.cursor_idx // COLS + 1
+            total_rows = max(1, (count + COLS - 1) // COLS)
+            nav_s = self.fonts["tiny"].render(
+                f"{self.cursor_idx + 1}/{count}  r{row}/{total_rows}",
+                True, BLUE
+            )
+            self.display.blit(nav_s, (hint_x - nav_s.get_width() - 8, hint_y))
 
         mx, my = pygame.mouse.get_pos()
         self.grid.draw_clip_start()
@@ -431,10 +626,11 @@ class CardViewer:
             pos = self.grid.card_pos(i)
             cr  = self.grid.clip_rect
             if cr.top - CARD_H <= pos[1] <= cr.bottom:
-                hov = (pos[0] <= mx <= pos[0] + CARD_W and
+                hov = (self._nav_mode == "mouse" and
+                       pos[0] <= mx <= pos[0] + CARD_W and
                        pos[1] <= my <= pos[1] + CARD_H and
                        cr.collidepoint(mx, my))
-                self.draw_card_tile(card, pos, hovered=hov)
+                self.draw_card_tile(card, i, pos, hovered=hov)
         self.grid.draw_clip_end()
         self.draw_scrollbar()
 
@@ -450,38 +646,33 @@ class CardViewer:
         pygame.draw.line(self.display, BORDER, (sx, 80 + oy), (WIDTH - 4, 80 + oy), 1)
 
         cy = 94 + oy
-        pw = SIDEBAR_W - 28   # preview width
+        pw = SIDEBAR_W - 28
 
         # ── Card preview ──────────────────────────────────────────────
         card = self.selected_card
         if card is not None:
             cat_col_p = CATEGORY_COLORS.get(card["category"], BLUE)
 
-            # Accent bar
             pygame.draw.rect(self.display, cat_col_p,
                              pygame.Rect(sx + 6, cy, pw, 6),
                              border_top_left_radius=8, border_top_right_radius=8)
 
-            # Image
             iw = pw - 8
             ih = int(iw * 1.0)
             img = load_image(card["image"], iw, ih)
             self.display.blit(img, (sx + 10, cy + 8))
             cy += ih + 14
 
-            # Name
             ns = self.fonts["large"].render(card["name"], True, WHITE)
             if ns.get_width() > pw - 8:
                 ns = self.fonts["normal"].render(card["name"], True, WHITE)
             self.display.blit(ns, (sx + 6 + pw // 2 - ns.get_width() // 2, cy))
             cy += ns.get_height() + 4
 
-            # Category badge
             cat_s = self.fonts["small"].render(card["category"].upper(), True, cat_col_p)
             self.display.blit(cat_s, (sx + 6 + pw // 2 - cat_s.get_width() // 2, cy))
             cy += cat_s.get_height() + 8
 
-            # Value orb
             value = card.get("value", None)
             if value is not None:
                 orb_r  = 20
@@ -491,7 +682,6 @@ class CardViewer:
                                cat_col_p, self.fonts["normal"], orb_r)
                 cy += orb_r * 2 + 10
 
-            # Description
             desc = card.get("desc", "")
             if desc:
                 pygame.draw.line(self.display, BORDER,
@@ -503,34 +693,51 @@ class CardViewer:
                     cy += ds.get_height() + 2
                 cy += 4
 
+            # Card index / position info when navigating by keys
+            if self._nav_mode == "keys" and self.cursor_idx >= 0:
+                pygame.draw.line(self.display, BORDER,
+                                 (sx + 12, cy), (sx + 6 + pw - 6, cy), 1)
+                cy += 6
+                pos_s = self.fonts["tiny"].render(
+                    f"Card {self.cursor_idx + 1} of {len(self.filtered)}",
+                    True, DIM
+                )
+                self.display.blit(pos_s, (sx + 6 + pw // 2 - pos_s.get_width() // 2, cy))
+                cy += pos_s.get_height() + 4
+
             pygame.draw.line(self.display, BORDER, (sx, cy + 4), (WIDTH - 4, cy + 4), 1)
             cy += 12
         else:
             hint_r = pygame.Rect(sx + 6, cy, pw, 60)
             rrect(self.display, PANEL2, hint_r, r=8)
-            t = self.fonts["small"].render("Click a card to preview", True, MUTED)
+            t = self.fonts["small"].render("Click a card or use ↑↓←→", True, MUTED)
             self.display.blit(t, (hint_r.centerx - t.get_width() // 2,
                                   hint_r.centery - t.get_height() // 2))
             cy += 72
 
         # ── Controls ──────────────────────────────────────────────────
         controls = [
-            ("ESC",  "Main menu"),
-            ("D",    "Deck Manager"),
-            ("R",    "Reset / All"),
-            ("X",    "Random card"),
-            ("F",    "Cycle sort"),
-            ("←/→",  "Switch category"),
-            ("1–7",  "Jump to category"),
+            ("↑↓←→",  "Navigate cards"),
+            ("Enter",  "Select card"),
+            ("PgUp/Dn","Page through"),
+            ("Home",   "First card"),
+            ("End",    "Last card"),
+            ("Tab",    "Next category"),
+            ("ESC",    "Main menu"),
+            ("D",      "Deck Manager"),
+            ("R",      "Reset / All"),
+            ("X",      "Random card"),
+            ("F",      "Cycle sort"),
+            ("1–7",    "Jump category"),
         ]
         for key, desc in controls:
             if cy + 28 > HEIGHT + self.sidebar_scroll_y - 10: break
-            kr = pygame.Rect(sx + 6, cy, 34, 20)
+            kr = pygame.Rect(sx + 6, cy, 42, 20)
             rrect(self.display, (32, 44, 62), kr, r=4)
-            ks = self.fonts["small"].render(key, True, BLUE)
-            self.display.blit(ks, (kr.centerx - ks.get_width() // 2, kr.y + 2))
-            self._txt(desc, sx + 46, cy + 2, MUTED, "small")
-            cy += 28
+            ks = self.fonts["tiny"].render(key, True, BLUE)
+            self.display.blit(ks, (kr.centerx - ks.get_width() // 2, kr.y + 3))
+            self._txt(desc, sx + 54, cy + 2, MUTED, "small")
+            cy += 26
 
         pygame.draw.line(self.display, BORDER, (sx, cy + 2), (WIDTH - 4, cy + 2), 1)
         cy += 10
@@ -544,7 +751,7 @@ class CardViewer:
             rrect(self.display, col, dot, r=4)
             active = (cat == self.active_cat)
             self._txt(cat,        sx + 24,  cy, WHITE if active else MUTED, "small")
-            self._txt(str(count), sx + 110, cy, DIM,   "small")
+            self._txt(str(count), sx + 110, cy, DIM, "small")
             cy += 20
 
         pygame.draw.line(self.display, BORDER, (sx, cy + 4), (WIDTH - 4, cy + 4), 1)
@@ -554,7 +761,7 @@ class CardViewer:
         self._txt("Sort", sx + 6, cy, WHITE, "small"); cy += 20
         for mode in SORT_MODES:
             active = (mode == self.sort_mode)
-            col = AMBER if active else MUTED
+            col    = AMBER if active else MUTED
             prefix = "● " if active else "  "
             self._txt(prefix + mode, sx + 10, cy, col, "small")
             cy += 18
@@ -567,6 +774,8 @@ class CardViewer:
         self._txt("Stats", sx + 6, cy, WHITE, "small"); cy += 20
         self._txt(f"Total    {len(self.all_cards)}", sx + 6, cy, MUTED, "small"); cy += 20
         self._txt(f"Showing  {len(self.filtered)}",  sx + 6, cy, MUTED, "small"); cy += 20
+        if self._nav_mode == "keys" and self.cursor_idx >= 0:
+            self._txt(f"Cursor   {self.cursor_idx + 1}", sx + 6, cy, BLUE, "small"); cy += 20
 
         pygame.draw.line(self.display, BORDER, (sx, cy + 4), (WIDTH - 4, cy + 4), 1)
         cy += 12
@@ -579,7 +788,6 @@ class CardViewer:
             self._txt(self.status, sx + 6, cy, col, "normal")
             cy += 28
 
-        # Sidebar scroll book-keeping
         content_bottom = cy + self.sidebar_scroll_y
         self._sidebar_max_scroll = max(0, content_bottom - HEIGHT + 20)
         self.display.set_clip(None)
@@ -599,18 +807,29 @@ class CardViewer:
         rrect(self.display, PANEL, bar, r=0)
         pygame.draw.line(self.display, BORDER, (0, 52), (WIDTH, 52), 1)
         self._txt("✦  Card Viewer", 20, 14, WHITE, "title")
-        hint = self.fonts["small"].render(
-            "← → categories  ·  F sort  ·  X random  ·  click to preview", True, DIM
-        )
+
+        if self._nav_mode == "keys":
+            hint_text = "↑↓←→ navigate  ·  Enter select  ·  Tab/click category pills  ·  F sort  ·  X random"
+            hint_col  = BLUE
+        else:
+            hint_text = "click category pills to filter  ·  F sort  ·  X random  ·  ↑↓←→ key-nav"
+            hint_col  = DIM
+
+        hint = self.fonts["small"].render(hint_text, True, hint_col)
         self.display.blit(hint, (WIDTH // 2 - hint.get_width() // 2, 18))
+
+        # Nav mode badge
+        mode_s = self.fonts["tiny"].render(
+            "⌨ KEYS" if self._nav_mode == "keys" else "🖱 MOUSE",
+            True, BLUE if self._nav_mode == "keys" else MUTED
+        )
+        self.display.blit(mode_s, (WIDTH - SIDEBAR_W - mode_s.get_width() - 20, 18))
 
     def draw(self):
         self.tick_status()
         self.display.fill(BG)
         self.draw_header()
-        self.draw_category_tabs()
-        self.draw_sort_tabs()
-        self.draw_grid()
+        self.draw_grid()      # pills are drawn inside draw_grid
         self.draw_sidebar()
 
 

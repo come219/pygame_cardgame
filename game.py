@@ -1,545 +1,959 @@
-# pygame - card game, yugioh imitation
+"""
+game.py  —  Rock Paper Scissors card game (UI mockup)
+Implements the new sidebar / card-preview standard from deck_viewer & card_viewer.
+Actual game logic is a placeholder; full implementation comes later.
+"""
 import pygame
 import random
-import card
-from deck import Deck
-from graveyard import Graveyard
-from Banished import Banished
-from enemy_deck import Enemy_Deck
-from enemy_graveyard import Enemy_Graveyard
-from enemy_banished import Enemy_Banished
+import os
 
-# Initialize Pygame
-pygame.init()
+# ─── optional imports for navigation ──────────────────────────────────
+try:
+    import cardgame as _cardgame
+except ImportError:
+    _cardgame = None
 
-# Screen dimensions 800x600 
-display_Width = 1920
-display_Height = 1080
-WIDTH, HEIGHT = display_Width, display_Height
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Rock Paper Scissors")
+import cards as _cards_module
+ALL_CARDS    = _cards_module.ALL_CARDS
+CARD_BY_NAME = {c["name"]: c for c in ALL_CARDS}
 
-# Colors
-WHITE = (255, 255, 255)
-BLACK = (0, 0, 0)
-RED = (255, 0, 0)
-GREEN = (0, 255, 0)
-BLUE = (0, 0, 255)
-GREY = (128, 128, 128)
-LIGHT_BLUE = (173, 216, 230)
-LIGHT_RED = (255, 182, 193)
-LIGHT_GREEN = (144, 238, 144)
-DARK_GREY = (69, 69, 69)
+# ═════════════════════════════════════════════════════════════════════
+# Constants
+# ═════════════════════════════════════════════════════════════════════
+WIDTH, HEIGHT = 1920, 1080
 
-# Font
-font = pygame.font.SysFont(None, 50)
-font_small = pygame.font.SysFont(None, 22)
+# ── Palette ───────────────────────────────────────────────────────────
+BG            = (12,  14,  20)
+PANEL         = (20,  24,  34)
+PANEL2        = (26,  30,  42)
+BORDER        = (38,  46,  64)
+CARD_BG       = (30,  36,  50)
+CARD_HOV      = (44,  54,  76)
+CARD_GREY     = (18,  20,  26)
+CARD_BORD     = (50,  62,  88)
+CARD_BORD_ACT = (80, 160, 220)
+WHITE         = (225, 232, 245)
+MUTED         = (95,  108, 132)
+DIM           = (55,  65,  85)
+RED           = (210,  65,  65)
+AMBER         = (215, 155,  45)
+BLUE          = (75,  145, 255)
+TEAL          = (45,  195, 165)
+GREEN         = (65,  190,  95)
+PURPLE        = (145,  90, 220)
+OVERLAY       = (8,   10,  16, 225)
+FIELD_IDLE    = (28,  36,  50)
+FIELD_HOVER   = (34,  52,  42)
+FIELD_ACTIVE  = (30,  62,  44)
 
-# Load images
-deck_image = pygame.image.load("assets/deck_image.png")
-graveyard_image = pygame.image.load("assets/graveyard_image.png")
-banished_image = pygame.image.load("assets/banished_icon.png")
-rock_img = pygame.image.load("assets/card_rock.png")
-paper_img = pygame.image.load("assets/card_paper.png")
-scissors_img = pygame.image.load("assets/card_scissors.png")
-card_back_image = pygame.image.load("assets/card_back.png")
-card_info_image = pygame.image.load("assets/card_info.png")
-
-# Scale images
-rock_img = pygame.transform.scale(rock_img, (150, 150))
-paper_img = pygame.transform.scale(paper_img, (150, 150))
-scissors_img = pygame.transform.scale(scissors_img, (150, 150))
-deck_img = pygame.transform.scale(deck_image, (150, 150))
-graveyard_img = pygame.transform.scale(graveyard_image, (150, 150))
-banished_img = pygame.transform.scale(banished_image, (150, 150))
-card_back_img = pygame.transform.scale(card_back_image, (150, 150))
-card_info_img = pygame.transform.scale(card_info_image, (300, 400))
-card_images = {
-    "Rock": rock_img,
-    "Paper": paper_img,
-    "Scissors": scissors_img
+CATEGORY_COLORS = {
+    "Core":    TEAL,
+    "Toon":    PURPLE,
+    "Special": AMBER,
+    "Exodia":  RED,
+    "Units":   (75,  175, 120),
+    "Spells":  (180, 100, 220),
+    "AA":      (220, 140,  60),
 }
 
-draw_at_start = 5
-global b_drawn_start
-b_drawn_start = False
-# player's hand, field, deck, graveyard, banished
-hand = []
-player_field = []   
-player_deck = ["Rock", "Paper", "Scissors", "Scissors", "Rock",  "Paper",  ] 
-player_graveyard = []
-player_banished= []
-deck_pos = (1700, 800)
-graveyard_pos = (1750, 590)
-banished_pos = (1600, 590)
-deck = Deck(player_deck, card_images, deck_image, deck_pos)
-graveyard = Graveyard(player_graveyard, card_images, graveyard_image, graveyard_pos )
-banished = Banished(player_banished, card_images, banished_img, banished_pos)
-# Choices - enemy deck
-choices = ["Rock", "Paper", "Scissors", "Rock", "Paper", "Scissors"]
-enemy_field = []
-enemy_deck = ["Rock", "Paper", "Scissors", "Rock", "Paper", "Scissors"]
-enemy_graveyard = []
-enemy_banished = []
-enemy_deck_pos = (50, 80)
-enemy_graveyard_pos = (50, 300)
-enemy_banished_pos = (250, 300)
-enemy_deck = Enemy_Deck(enemy_deck, card_images, deck_image, enemy_deck_pos)
-enemy_graveyard = Enemy_Graveyard(enemy_graveyard, card_images, graveyard_image, enemy_graveyard_pos)
-enemy_banished = Enemy_Banished(enemy_banished, card_images, banished_image, enemy_banished_pos)
+# ── Layout ────────────────────────────────────────────────────────────
+SIDEBAR_X  = 1490
+SIDEBAR_W  = WIDTH - SIDEBAR_X
+PAD        = 14
+
+CARD_W, CARD_H = 108, 148     # hand / field card size
+HAND_Y         = HEIGHT - CARD_H - 30
+FIELD_X        = WIDTH  // 2 - 350
+FIELD_Y        = HEIGHT // 2 - 180
+FIELD_W        = 800
+FIELD_H        = 420
+
+# Enemy hand row
+ENEMY_HAND_Y   = 60
+ENEMY_CARD_W   = 90
+ENEMY_CARD_H   = 120
+
+# Deck / graveyard / banished zone positions
+DECK_POS      = (1700, 800)
+GRAVE_POS     = (1560, 800)
+BAN_POS       = (1420, 800)
+E_DECK_POS    = (50,   60)
+E_GRAVE_POS   = (50,  200)
+E_BAN_POS     = (160, 200)
+
+STATUS_DUR = 180
+
+# ═════════════════════════════════════════════════════════════════════
+# Helpers
+# ═════════════════════════════════════════════════════════════════════
+def rrect(surf, color, rect, r=8, bw=0, bc=None):
+    pygame.draw.rect(surf, color, rect, border_radius=r)
+    if bw and bc:
+        pygame.draw.rect(surf, bc, rect, bw, border_radius=r)
+
+def panel(surf, rect, r=10):
+    rrect(surf, PANEL, rect, r)
+    rrect(surf, BORDER, rect, r, 1)
+
+def clamp(v, lo, hi):
+    return max(lo, min(hi, v))
+
+def wrap_text(font, text, max_w):
+    words, lines, line = text.split(), [], ""
+    for w in words:
+        test = (line + " " + w).strip()
+        if font.size(test)[0] <= max_w:
+            line = test
+        else:
+            if line: lines.append(line)
+            line = w
+    if line: lines.append(line)
+    return lines
+
+def card_accent(card_dict):
+    return CATEGORY_COLORS.get(card_dict.get("category", ""), BLUE) if card_dict else BLUE
+
+def draw_value_orb(surf, value, cx, cy, accent, font, orb_r=11):
+    pygame.draw.circle(surf, accent, (cx, cy), orb_r)
+    pygame.draw.circle(surf, PANEL2,  (cx, cy), orb_r - 3)
+    pygame.draw.circle(surf, accent, (cx, cy), orb_r - 6)
+    vs = font.render(str(value), True, WHITE)
+    surf.blit(vs, (cx - vs.get_width() // 2, cy - vs.get_height() // 2))
 
 
-# Function to display text
-def display_text(text, color, x, y):
-    screen_text = font.render(text, True, color)
-    screen.blit(screen_text, (x, y))
+# ═════════════════════════════════════════════════════════════════════
+# Image cache
+# ═════════════════════════════════════════════════════════════════════
+_img_cache = {}
 
-# Function to determine the winner
-def determine_winner(player, computer):
-    if player == computer:
-        return "Draw"
-    elif (player == "Rock" and computer == "Scissors") or \
-        (player == "Paper" and computer == "Rock") or \
-        (player == "Scissors" and computer == "Paper"):
-        return "Player Wins"
+def load_img(path, w, h):
+    key = (path, w, h)
+    if key in _img_cache:
+        return _img_cache[key]
+    try:
+        img = pygame.image.load(path).convert_alpha()
+        img = pygame.transform.smoothscale(img, (w, h))
+    except Exception:
+        img = pygame.Surface((w, h), pygame.SRCALPHA)
+        img.fill((38, 44, 60, 220))
+    _img_cache[key] = img
+    return img
+
+
+# ═════════════════════════════════════════════════════════════════════
+# Card widget (standalone draw function, no class needed)
+# ═════════════════════════════════════════════════════════════════════
+def draw_card_tile(surf, fonts, card_dict, rx, ry, w=CARD_W, h=CARD_H,
+                   greyed=False, selected=False, face_down=False):
+    """Draw a card face-up or face-down at (rx, ry)."""
+    mx, my = pygame.mouse.get_pos()
+    hov    = rx <= mx <= rx + w and ry <= my <= ry + h and not greyed and not face_down
+
+    if greyed:
+        bg, bord = CARD_GREY, (32, 36, 46)
+    elif selected:
+        bg, bord = CARD_HOV, TEAL
+    elif hov:
+        bg, bord = CARD_HOV, CARD_BORD_ACT
     else:
-        return "Computer Wins"
+        bg, bord = CARD_BG, CARD_BORD
+
+    r = pygame.Rect(rx, ry, w, h)
+    rrect(surf, bg, r, r=7)
+    rrect(surf, bord, r, r=7, bw=2 if selected else 1)
+
+    if face_down:
+        # Card back pattern
+        inner = pygame.Rect(rx + 4, ry + 4, w - 8, h - 8)
+        rrect(surf, (22, 28, 42), inner, r=5)
+        rrect(surf, BORDER, inner, r=5, bw=1)
+        # Simple cross-hatch hint
+        for i in range(4, w - 4, 12):
+            pygame.draw.line(surf, BORDER, (rx + i, ry + 4), (rx + i, ry + h - 4), 1)
+        return
+
+    if card_dict is None:
+        return
+
+    accent = card_accent(card_dict)
+
+    # Accent stripe
+    stripe = pygame.Rect(rx + 1, ry + 1, w - 2, 4)
+    pygame.draw.rect(surf, accent, stripe,
+                     border_top_left_radius=6, border_top_right_radius=6)
+
+    # Card image
+    img_h = h - 28
+    img   = load_img(card_dict["image"], w - 4, img_h)
+    if greyed:
+        gs = img.copy()
+        gs.fill((0, 0, 0, 130), special_flags=pygame.BLEND_RGBA_MULT)
+        surf.blit(gs, (rx + 2, ry + 6))
+    else:
+        surf.blit(img, (rx + 2, ry + 6))
+
+    # Name
+    name = card_dict["name"]
+    ns   = fonts["small"].render(name, True, WHITE if not greyed else MUTED)
+    if ns.get_width() > w - 4:
+        ns = fonts["tiny"].render(name, True, WHITE if not greyed else MUTED)
+    surf.blit(ns, (rx + w // 2 - ns.get_width() // 2, ry + h - 18))
+
+    # Value orb
+    value = card_dict.get("value", None)
+    if value is not None:
+        draw_value_orb(surf, value, rx + 12, ry + h - 14,
+                       MUTED if greyed else accent, fonts["tiny"], orb_r=10)
 
 
+# ═════════════════════════════════════════════════════════════════════
+# Sidebar card preview  (ported from deck_viewer)
+# ═════════════════════════════════════════════════════════════════════
+class CardPreview:
+    def __init__(self, display, fonts):
+        self.display = display
+        self.fonts   = fonts
+        self.card    = None
+        self.label   = ""    # e.g. "in hand", "on field"
 
-card_rock = card.card("Rock", rock_img, 0, 0)
-card_paper = card.card("Paper", paper_img, 0, 0)
-card_scissors = card.card("Scissorss", scissors_img, 0, 0)
-card_back = card.card("Card", card_back_img, 1600, 800)
-card_hand_1 = card.card("Card", paper_img, 0, 0)
+    def set_card(self, card_dict, label=""):
+        self.card  = card_dict
+        self.label = label
 
-card_objs = []
+    def draw(self, sx, cy, preview_w):
+        """Draw inside sidebar starting at (sx, cy). Returns new cy."""
+        fs = self.fonts["small"]
+        fn = self.fonts["normal"]
+        fl = self.fonts["large"]
+        fd = self.fonts["desc"]
 
-def check_card_clicked(mouse_pos ):
-    if card_rock.is_clicked(card_rock, mouse_pos):
+        if self.card is None:
+            t  = fs.render("Hover a card", True, MUTED)
+            t2 = fs.render("to preview it", True, DIM)
+            self.display.blit(t,  (sx + preview_w // 2 - t.get_width()  // 2, cy + 8))
+            self.display.blit(t2, (sx + preview_w // 2 - t2.get_width() // 2, cy + 26))
+            return cy + 50
+
+        accent = card_accent(self.card)
+
+        # Accent bar
+        pygame.draw.rect(self.display, accent,
+                         pygame.Rect(sx, cy, preview_w, 5),
+                         border_top_left_radius=6, border_top_right_radius=6)
+        cy += 7
+
+        # Image
+        iw = preview_w - 4
+        ih = int(iw * 0.9)
+        img = load_img(self.card["image"], iw, ih)
+        self.display.blit(img, (sx + 2, cy))
+        cy += ih + 6
+
+        # Name
+        ns = fl.render(self.card["name"], True, WHITE)
+        if ns.get_width() > preview_w:
+            ns = fn.render(self.card["name"], True, WHITE)
+        self.display.blit(ns, (sx + preview_w // 2 - ns.get_width() // 2, cy))
+        cy += ns.get_height() + 4
+
+        # Category
+        cat_s = fs.render(self.card.get("category", "").upper(), True, accent)
+        self.display.blit(cat_s, (sx + preview_w // 2 - cat_s.get_width() // 2, cy))
+        cy += cat_s.get_height() + 6
+
+        # Value orb
+        value = self.card.get("value", None)
+        if value is not None:
+            orb_r  = 18
+            orb_cx = sx + preview_w // 2
+            orb_cy = cy + orb_r
+            pygame.draw.circle(self.display, accent, (orb_cx, orb_cy), orb_r)
+            pygame.draw.circle(self.display, PANEL2,  (orb_cx, orb_cy), orb_r - 3)
+            pygame.draw.circle(self.display, accent, (orb_cx, orb_cy), orb_r - 7)
+            vs = fn.render(str(value), True, WHITE)
+            self.display.blit(vs, (orb_cx - vs.get_width() // 2, orb_cy - vs.get_height() // 2))
+            cy += orb_r * 2 + 8
+
+        # Label (in hand / on field)
+        if self.label:
+            lt = fs.render(self.label, True, TEAL)
+            self.display.blit(lt, (sx + preview_w // 2 - lt.get_width() // 2, cy))
+            cy += lt.get_height() + 4
+
+        # Divider
+        pygame.draw.line(self.display, BORDER, (sx + 4, cy), (sx + preview_w - 4, cy), 1)
+        cy += 6
+
+        # Description
+        desc = self.card.get("desc", "")
+        if desc:
+            for line in wrap_text(fd, desc, preview_w - 8):
+                ds = fd.render(line, True, MUTED)
+                self.display.blit(ds, (sx + 4, cy))
+                cy += ds.get_height() + 2
+            cy += 4
+
+        pygame.draw.line(self.display, BORDER, (sx + 4, cy), (sx + preview_w - 4, cy), 1)
+        cy += 8
+        return cy
+
+
+# ═════════════════════════════════════════════════════════════════════
+# Zone widgets  (deck pile, graveyard, banished)
+# ═════════════════════════════════════════════════════════════════════
+class ZonePile:
+    """A face-down deck pile or face-up graveyard / banished zone."""
+    def __init__(self, label, pos, img_path, color=MUTED, face_down=True):
+        self.label     = label
+        self.pos       = pos
+        self.color     = color
+        self.face_down = face_down
+        self.cards     = []
+        self._img      = load_img(img_path, 80, 80) if os.path.exists(img_path) else None
+        self.rect      = pygame.Rect(pos[0], pos[1], 80, 100)
+
+    def draw(self, surf, fonts):
+        x, y = self.pos
+        rrect(surf, PANEL, self.rect, r=6)
+        rrect(surf, self.color, self.rect, r=6, bw=1)
+        if self._img:
+            surf.blit(self._img, (x, y + 10))
+        else:
+            t = fonts["tiny"].render(self.label[0], True, self.color)
+            surf.blit(t, (x + 40 - t.get_width() // 2, y + 36))
+        # count badge
+        count_s = fonts["small"].render(f"{self.label}:{len(self.cards)}", True, self.color)
+        surf.blit(count_s, (x, y + 86))
+
+    def hovered(self):
+        return self.rect.collidepoint(pygame.mouse.get_pos())
+
+
+# ═════════════════════════════════════════════════════════════════════
+# Main game class
+# ═════════════════════════════════════════════════════════════════════
+class Game:
+    HAND_SIZE    = 5
+    DOUBLE_CLICK = 400   # ms
+
+    # Starting deck — names that must exist in ALL_CARDS
+    STARTING_DECK = [
+        "Rock", "Rock", "Paper", "Paper",
+        "Scissors", "Scissors", "Fire", "Water", "Wind",
+        "Knight", "Archer", "Mage",
+    ]
+
+    def __init__(self, display):
+        self.display = display
+
+        self.fonts = {
+            "normal": pygame.font.Font(None, 26),
+            "small":  pygame.font.Font(None, 21),
+            "large":  pygame.font.Font(None, 42),
+            "title":  pygame.font.Font(None, 34),
+            "desc":   pygame.font.Font(None, 20),
+            "tiny":   pygame.font.Font(None, 17),
+        }
+
+        # ── Player state ──────────────────────────────────────────────
+        self.player_deck      = [c for c in self.STARTING_DECK if c in CARD_BY_NAME]
+        random.shuffle(self.player_deck)
+        self.player_hand      = []
+        self.player_field     = []      # max 2 for now
+        self.player_graveyard = []
+        self.player_banished  = []
+        self.player_hp        = 20
+
+        # ── Enemy state ───────────────────────────────────────────────
+        self.enemy_deck      = [c for c in self.STARTING_DECK if c in CARD_BY_NAME]
+        random.shuffle(self.enemy_deck)
+        self.enemy_hand      = []        # face-down
+        self.enemy_field     = []
+        self.enemy_graveyard = []
+        self.enemy_banished  = []
+        self.enemy_hp        = 20
+
+        # ── UI state ──────────────────────────────────────────────────
+        self.selected_hand_idx  = -1     # which hand card is selected
+        self.dragging           = False
+        self.drag_card_name     = None
+        self.drag_origin        = None   # "hand" or "field"
+        self.drag_pos           = (0, 0)
+
+        self.status        = ""
+        self.status_timer  = 0
+        self.round         = 1
+        self.phase         = "draw"      # draw → main → battle → end
+        self.result        = None        # "Player Wins" / "Enemy Wins" / "Draw"
+
+        self.show_graveyard = False
+        self.show_banished  = False
+        self.show_history   = False
+        self.history_log    = []
+
+        self.last_click_time = 0
+
+        # ── Preview sidebar ───────────────────────────────────────────
+        self.preview = CardPreview(display, self.fonts)
+
+        # ── Zone piles ────────────────────────────────────────────────
+        self.p_deck   = ZonePile("Deck",    DECK_POS,  "assets/deck_image.png",       BLUE,  True)
+        self.p_grave  = ZonePile("Grave",   GRAVE_POS, "assets/graveyard_image.png",  MUTED, False)
+        self.p_ban    = ZonePile("Banish",  BAN_POS,   "assets/banished_icon.png",    AMBER, False)
+        self.e_deck   = ZonePile("Deck",    E_DECK_POS,  "assets/deck_image.png",     RED,   True)
+        self.e_grave  = ZonePile("Grave",   E_GRAVE_POS, "assets/graveyard_image.png",MUTED, False)
+        self.e_ban    = ZonePile("Banish",  E_BAN_POS,   "assets/banished_icon.png",  AMBER, False)
+
+        # ── Initial draw ──────────────────────────────────────────────
+        self._draw_cards(self.HAND_SIZE)
+        self._enemy_draw(self.HAND_SIZE)
+        self._log("Round 1 started")
+        self._log(f"Player draws {self.HAND_SIZE} cards")
+        self._log(f"Enemy draws {self.HAND_SIZE} cards")
+
+    # ─── helpers ──────────────────────────────────────────────────────
+    def _txt(self, text, x, y, color=WHITE, fk="normal"):
+        s = self.fonts[fk].render(text, True, color)
+        self.display.blit(s, (x, y))
+
+    def set_status(self, msg):
+        self.status       = msg
+        self.status_timer = STATUS_DUR
+
+    def tick_status(self):
+        if self.status_timer > 0:
+            self.status_timer -= 1
+            if self.status_timer == 0:
+                self.status = ""
+
+    def _log(self, msg):
+        self.history_log.append(msg)
+        if len(self.history_log) > 30:
+            self.history_log.pop(0)
+
+    def _draw_cards(self, n=1):
+        for _ in range(n):
+            if self.player_deck:
+                self.player_hand.append(self.player_deck.pop())
+
+    def _enemy_draw(self, n=1):
+        for _ in range(n):
+            if self.enemy_deck:
+                self.enemy_hand.append(self.enemy_deck.pop())
+
+    def _hand_card_rect(self, idx):
+        total   = len(self.player_hand)
+        spacing = min(CARD_W + 10, (SIDEBAR_X - 80) // max(1, total))
+        start_x = (SIDEBAR_X - total * spacing) // 2
+        return pygame.Rect(start_x + idx * spacing, HAND_Y, CARD_W, CARD_H)
+
+    def _field_slot_rect(self, idx):
+        """Two player field slots side by side."""
+        return pygame.Rect(FIELD_X + 30 + idx * (CARD_W + 20), FIELD_Y + FIELD_H // 2 + 10,
+                           CARD_W, CARD_H)
+
+    def _enemy_field_slot_rect(self, idx):
+        return pygame.Rect(FIELD_X + 30 + idx * (CARD_W + 20), FIELD_Y + 20,
+                           CARD_W, CARD_H)
+
+    def _card_at_hand(self, pos):
+        for i in range(len(self.player_hand)):
+            if self._hand_card_rect(i).collidepoint(pos):
+                return i
+        return -1
+
+    def _card_at_field(self, pos):
+        for i in range(len(self.player_field)):
+            if self._field_slot_rect(i).collidepoint(pos):
+                return i
+        return -1
+
+    def _in_field_zone(self, pos):
+        return pygame.Rect(FIELD_X, FIELD_Y, FIELD_W, FIELD_H).collidepoint(pos)
+
+    def _play_to_field(self, hand_idx):
+        if len(self.player_field) >= 2:
+            self.set_status("Field full! (max 2)")
+            return
+        name = self.player_hand.pop(hand_idx)
+        self.player_field.append(name)
+        self.selected_hand_idx = -1
+        self._log(f"Player played {name}")
+        self.set_status(f"Played {name}")
+        self.preview.set_card(CARD_BY_NAME.get(name), "on field")
+
+    def _resolve_battle(self):
+        """Simple RPS resolution — placeholder for full logic."""
+        BEATS = {
+            "Rock": ["Scissors"], "Paper": ["Rock"], "Scissors": ["Paper"],
+            "Fire": ["Wind", "Ice"], "Water": ["Fire"], "Wind": ["Earth"],
+            "Earth": ["Water", "Lightning"], "Lightning": ["Water"],
+            "Ice": ["Wind"], "Shadow": ["Light"], "Light": ["Shadow"],
+        }
+
+        p_names = self.player_field[:]
+        e_names = self.enemy_field[:] if self.enemy_field else [random.choice(
+            ["Rock","Paper","Scissors"])]
+
+        wins = 0
+        for pn in p_names:
+            for en in e_names:
+                if en in BEATS.get(pn, []):
+                    wins += 1
+
+        if wins > 0:
+            self.result = "Player Wins"
+            self.enemy_hp = max(0, self.enemy_hp - wins)
+            self._log(f"Player wins the round! (+{wins} damage)")
+        elif not p_names:
+            self.result = "Enemy Wins"
+            self.player_hp = max(0, self.player_hp - 1)
+            self._log("Enemy wins (no cards played)")
+        else:
+            self.result = "Draw"
+            self._log("Round draws")
+
+        # Move field to graveyard
+        self.player_graveyard.extend(self.player_field)
+        self.enemy_graveyard.extend(self.enemy_field)
+        self.player_field.clear()
+        self.enemy_field.clear()
+        self.set_status(f"Result: {self.result}")
+
+    def _end_turn(self):
+        # Enemy plays a random card
+        if self.enemy_hand:
+            played = random.choice(self.enemy_hand)
+            self.enemy_hand.remove(played)
+            self.enemy_field.append(played)
+            self._log(f"Enemy plays a card")
+
+        self._resolve_battle()
+        self.round += 1
+        self.phase = "draw"
+
+        # Refill hands
+        if len(self.player_hand) < self.HAND_SIZE and self.player_deck:
+            drawn = min(2, self.HAND_SIZE - len(self.player_hand))
+            self._draw_cards(drawn)
+            self._log(f"Player draws {drawn}")
+        if len(self.enemy_hand) < self.HAND_SIZE and self.enemy_deck:
+            self._enemy_draw(min(2, self.HAND_SIZE - len(self.enemy_hand)))
+
+        self.p_deck.cards   = self.player_deck
+        self.p_grave.cards  = self.player_graveyard
+        self.p_ban.cards    = self.player_banished
+        self.e_deck.cards   = self.enemy_deck
+        self.e_grave.cards  = self.enemy_graveyard
+        self.e_ban.cards    = self.enemy_banished
+
+    # ═════════════════════════════════════════════════════════════════
+    # Event handling
+    # ═════════════════════════════════════════════════════════════════
+    def handle_events(self):
+        for e in pygame.event.get():
+            if e.type == pygame.QUIT:
+                return False
+
+            elif e.type == pygame.MOUSEMOTION:
+                self.drag_pos = e.pos
+                self._hover_update(e.pos)
+
+            elif e.type == pygame.MOUSEBUTTONDOWN and e.button == 1:
+                self._on_click(e.pos)
+
+            elif e.type == pygame.MOUSEBUTTONUP and e.button == 1:
+                self._on_release(e.pos)
+
+            elif e.type == pygame.KEYDOWN:
+                if e.key == pygame.K_ESCAPE:
+                    if _cardgame:
+                        _cardgame.main()
+                    return False
+                elif e.key == pygame.K_e:
+                    self._end_turn()
+                elif e.key == pygame.K_d:
+                    self._draw_cards(1)
+                    self.set_status("Drew a card")
+                elif e.key == pygame.K_r:
+                    self.player_field.clear()
+                    self.selected_hand_idx = -1
+                    self.set_status("Field cleared")
+                elif e.key == pygame.K_h:
+                    self.show_history  = not self.show_history
+                    self.show_graveyard = False
+                    self.show_banished  = False
+                elif e.key == pygame.K_g:
+                    self.show_graveyard = not self.show_graveyard
+                    self.show_history   = False
+                    self.show_banished  = False
+                elif e.key == pygame.K_b:
+                    self.show_banished  = not self.show_banished
+                    self.show_history   = False
+                    self.show_graveyard = False
+
         return True
 
+    def _hover_update(self, pos):
+        """Update preview on hover."""
+        # Hand cards
+        for i in range(len(self.player_hand)):
+            if self._hand_card_rect(i).collidepoint(pos):
+                name = self.player_hand[i]
+                self.preview.set_card(CARD_BY_NAME.get(name), "in hand")
+                return
+        # Field cards
+        for i in range(len(self.player_field)):
+            if self._field_slot_rect(i).collidepoint(pos):
+                name = self.player_field[i]
+                self.preview.set_card(CARD_BY_NAME.get(name), "on field")
+                return
+        # Enemy field (revealed after battle)
+        for i in range(len(self.enemy_field)):
+            if self._enemy_field_slot_rect(i).collidepoint(pos):
+                name = self.enemy_field[i]
+                self.preview.set_card(CARD_BY_NAME.get(name), "enemy field")
+                return
 
-def show_hand_of_cards():
-    global b_drawn_start, card_objs
+    def _on_click(self, pos):
+        now = pygame.time.get_ticks()
+        double = (now - self.last_click_time) <= self.DOUBLE_CLICK
+        self.last_click_time = now
 
-    if not b_drawn_start:
-        if len(hand) < draw_at_start:
-            for i in range(draw_at_start):
-                card_type = random.choice(player_deck)  # Draw a card from the player's deck
-                player_deck.remove(card_type)
-                hand.append(card_type)
+        # Double-click hand card → play to field
+        if double:
+            idx = self._card_at_hand(pos)
+            if idx >= 0:
+                self._play_to_field(idx)
+                return
 
-                # Create a new card object for each card in the hand
-                if card_type == "Rock":
-                    card_obj = card.card("Rock", rock_img, 450 + i * 200, 850)
-                elif card_type == "Paper":
-                    card_obj = card.card("Paper", paper_img, 450 + i * 200, 850)
-                elif card_type == "Scissors":
-                    card_obj = card.card("Scissors", scissors_img, 450 + i * 200, 850)
+        # Single-click hand card → select / start drag
+        idx = self._card_at_hand(pos)
+        if idx >= 0:
+            self.selected_hand_idx = idx
+            self.dragging          = True
+            self.drag_card_name    = self.player_hand[idx]
+            self.drag_origin       = "hand"
+            name = self.player_hand[idx]
+            self.preview.set_card(CARD_BY_NAME.get(name), "in hand")
+            return
 
-                card_objs.append(card_obj)
+        # Click on field card → select for info
+        idx = self._card_at_field(pos)
+        if idx >= 0:
+            name = self.player_field[idx]
+            self.preview.set_card(CARD_BY_NAME.get(name), "on field")
+            return
 
-    # Draw each card in the hand
-    for card_obj in card_objs:
-        card_obj.draw(screen)
+        # End-turn button
+        if pygame.Rect(WIDTH - 180, HEIGHT - 60, 160, 44).collidepoint(pos):
+            self._end_turn()
 
-    b_drawn_start = True
+        # Draw button
+        if pygame.Rect(WIDTH - 360, HEIGHT - 60, 160, 44).collidepoint(pos):
+            self._draw_cards(1)
+            self.set_status("Drew a card")
 
-def show_hand_of_cards_old():
-    global b_drawn_start
-    
-    if b_drawn_start == False:
-        if(len(hand) < draw_at_start):
-            for i in range(draw_at_start):
-                # card = player_deck[i]
-                card = random.choice(player_deck)    # should be player's deck
-                player_deck.remove(card)
-                hand.append(card)
-                card_objs.append( card_rock )
-                
-        
-    # screen.blit(card_back_img, (1600, 800))
-    
-    for i, card in enumerate(hand):
-        if card == "Rock":
-            
-            # card_rock.position(650 + i * 200, 850)
-            screen.blit(card_rock.image, (card_rock.x, card_rock.y))
-            # screen.blit(card_back.image, (card_back.x, card_back.y))
-            #card_back.flip_card(rock_img, screen )
-            #card_back.moveto(650 + i * 200, 850, screen, 400)
-            #card_back.position(650 + i * 200, 850)
-            # screen.blit(rock_img, (650 + i * 200, 850))
-        elif card == "Paper":
-            screen.blit(card_paper.image, (card_paper.x, card_paper.y))
-        elif card == "Scissors":
-            screen.blit(card_scissors.image, (card_scissors.x, card_scissors.y))
-            # screen.blit(scissors_img, (650 + i * 200, 850))
-    
-    if b_drawn_start == False:
-        for i in range(len(hand)):
-            if i == 0: 
-                card_rock.x = 450 + i * 200
-                card_rock.y = 850
-            if i == 1:
-                card_paper.x = 650 + i * 200
-                card_paper.y = 850
-                pass
-            if i == 2:
-                card_scissors.x = 850 + i * 200
-                card_scissors.y = 850
-    b_drawn_start = True
+    def _on_release(self, pos):
+        if self.dragging and self.drag_card_name:
+            # Dropped in field zone → play card
+            if self._in_field_zone(pos) and self.drag_origin == "hand":
+                idx = self.player_hand.index(self.drag_card_name) if self.drag_card_name in self.player_hand else -1
+                if idx >= 0:
+                    self._play_to_field(idx)
+        self.dragging       = False
+        self.drag_card_name = None
+        self.drag_origin    = None
+
+    # ═════════════════════════════════════════════════════════════════
+    # Drawing
+    # ═════════════════════════════════════════════════════════════════
+    def _draw_header(self):
+        bar = pygame.Rect(0, 0, SIDEBAR_X, 52)
+        rrect(self.display, PANEL, bar, r=0)
+        pygame.draw.line(self.display, BORDER, (0, 52), (SIDEBAR_X, 52), 1)
+        self._txt("✦  Card Duel", 16, 12, WHITE, "title")
+        phase_col = {
+            "draw": TEAL, "main": BLUE, "battle": RED, "end": AMBER
+        }.get(self.phase, MUTED)
+        self._txt(f"Phase: {self.phase.upper()}", 220, 14, phase_col, "small")
+        self._txt(f"Round {self.round}", 380, 14, MUTED, "small")
+
+    def _draw_field(self):
+        # Field background
+        fr = pygame.Rect(FIELD_X, FIELD_Y, FIELD_W, FIELD_H)
+        mouse_in = fr.collidepoint(pygame.mouse.get_pos()) and self.dragging
+        rrect(self.display, FIELD_ACTIVE if mouse_in else FIELD_IDLE, fr, r=10)
+        rrect(self.display, TEAL if mouse_in else BORDER, fr, r=10, bw=2 if mouse_in else 1)
+
+        # Divider line
+        mid_y = FIELD_Y + FIELD_H // 2
+        pygame.draw.line(self.display, BORDER, (FIELD_X + 10, mid_y), (FIELD_X + FIELD_W - 10, mid_y), 1)
+
+        # Labels
+        self._txt("ENEMY FIELD", FIELD_X + 8, FIELD_Y + 6, DIM, "tiny")
+        self._txt("PLAYER FIELD", FIELD_X + 8, mid_y + 6, DIM, "tiny")
+
+        # Empty slot outlines
+        for i in range(2):
+            sr = self._field_slot_rect(i)
+            if i >= len(self.player_field):
+                rrect(self.display, PANEL2, sr, r=6)
+                rrect(self.display, BORDER, sr, r=6, bw=1)
+                ph = self.fonts["tiny"].render("drop here", True, DIM)
+                self.display.blit(ph, (sr.centerx - ph.get_width() // 2, sr.centery - 6))
+
+            er = self._enemy_field_slot_rect(i)
+            if i >= len(self.enemy_field):
+                rrect(self.display, PANEL2, er, r=6)
+                rrect(self.display, BORDER, er, r=6, bw=1)
+
+        # Player field cards
+        for i, name in enumerate(self.player_field):
+            sr = self._field_slot_rect(i)
+            draw_card_tile(self.display, self.fonts, CARD_BY_NAME.get(name),
+                           sr.x, sr.y, CARD_W, CARD_H)
+
+        # Enemy field cards (face-down unless result revealed)
+        for i, name in enumerate(self.enemy_field):
+            er = self._enemy_field_slot_rect(i)
+            revealed = (self.result is not None)
+            draw_card_tile(self.display, self.fonts, CARD_BY_NAME.get(name),
+                           er.x, er.y, CARD_W, CARD_H,
+                           face_down=not revealed)
+
+    def _draw_hand(self):
+        # Panel behind hand
+        hand_panel = pygame.Rect(0, HAND_Y - 14, SIDEBAR_X, CARD_H + 28)
+        panel(self.display, hand_panel, r=0)
+
+        self._txt(f"Hand ({len(self.player_hand)})", PAD, HAND_Y - 12, MUTED, "small")
+
+        for i in range(len(self.player_hand)):
+            r    = self._hand_card_rect(i)
+            name = self.player_hand[i]
+            sel  = (i == self.selected_hand_idx)
+            # Lift selected card slightly
+            y_off = -8 if sel else 0
+            draw_card_tile(self.display, self.fonts, CARD_BY_NAME.get(name),
+                           r.x, r.y + y_off, CARD_W, CARD_H, selected=sel)
+
+    def _draw_enemy_hand(self):
+        """Draw enemy hand as face-down cards."""
+        n       = len(self.enemy_hand)
+        spacing = min(ENEMY_CARD_W + 8, (SIDEBAR_X // 2) // max(1, n))
+        start_x = FIELD_X + FIELD_W + 20
+        for i in range(n):
+            draw_card_tile(self.display, self.fonts, None,
+                           start_x + i * spacing, ENEMY_HAND_Y,
+                           ENEMY_CARD_W, ENEMY_CARD_H, face_down=True)
+        self._txt(f"Enemy hand: {n}", start_x, ENEMY_HAND_Y + ENEMY_CARD_H + 4, DIM, "tiny")
+
+    def _draw_hp_bars(self):
+        # Player HP
+        px, py = PAD, HEIGHT - 58
+        self._txt(f"Player HP: {self.player_hp}", px, py, GREEN if self.player_hp > 10 else RED, "normal")
+        bar_bg = pygame.Rect(px, py + 22, 200, 8)
+        rrect(self.display, PANEL2, bar_bg, r=4)
+        fill_w = int(200 * max(0, self.player_hp) / 20)
+        rrect(self.display, GREEN if self.player_hp > 10 else RED,
+              pygame.Rect(px, py + 22, fill_w, 8), r=4)
+
+        # Enemy HP
+        ex, ey = PAD, 56
+        self._txt(f"Enemy HP: {self.enemy_hp}", ex, ey, RED if self.enemy_hp <= 10 else MUTED, "normal")
+        bar_bg2 = pygame.Rect(ex, ey + 22, 200, 8)
+        rrect(self.display, PANEL2, bar_bg2, r=4)
+        fill_w2 = int(200 * max(0, self.enemy_hp) / 20)
+        rrect(self.display, RED if self.enemy_hp <= 10 else MUTED,
+              pygame.Rect(ex, ey + 22, fill_w2, 8), r=4)
+
+    def _draw_zones(self):
+        self.p_deck.cards  = self.player_deck
+        self.p_grave.cards = self.player_graveyard
+        self.p_ban.cards   = self.player_banished
+        self.e_deck.cards  = self.enemy_deck
+        self.e_grave.cards = self.enemy_graveyard
+        self.e_ban.cards   = self.enemy_banished
+
+        for zone in (self.p_deck, self.p_grave, self.p_ban,
+                     self.e_deck, self.e_grave, self.e_ban):
+            zone.draw(self.display, self.fonts)
+
+    def _draw_buttons(self):
+        bw, bh = 160, 44
+        # Draw button
+        dr = pygame.Rect(SIDEBAR_X - 370, HEIGHT - 60, bw, bh)
+        hd = dr.collidepoint(pygame.mouse.get_pos())
+        rrect(self.display, (30, 44, 62) if hd else PANEL2, dr, r=8)
+        rrect(self.display, TEAL if hd else BORDER, dr, r=8, bw=1)
+        dt = self.fonts["normal"].render("D  Draw", True, TEAL if hd else MUTED)
+        self.display.blit(dt, (dr.centerx - dt.get_width() // 2, dr.centery - dt.get_height() // 2))
+
+        # End Turn button
+        er = pygame.Rect(SIDEBAR_X - 190, HEIGHT - 60, bw, bh)
+        he = er.collidepoint(pygame.mouse.get_pos())
+        rrect(self.display, (44, 28, 28) if he else PANEL2, er, r=8)
+        rrect(self.display, RED if he else BORDER, er, r=8, bw=1)
+        et = self.fonts["normal"].render("E  End Turn", True, RED if he else MUTED)
+        self.display.blit(et, (er.centerx - et.get_width() // 2, er.centery - et.get_height() // 2))
+
+    def _draw_result_banner(self):
+        if not self.result:
+            return
+        col = GREEN if self.result == "Player Wins" else RED if self.result == "Enemy Wins" else AMBER
+        t   = self.fonts["large"].render(self.result, True, col)
+        bx  = WIDTH // 2 - t.get_width() // 2 - 20
+        br  = pygame.Rect(bx, FIELD_Y + FIELD_H // 2 - 26, t.get_width() + 40, 52)
+        rrect(self.display, PANEL2, br, r=10)
+        rrect(self.display, col, br, r=10, bw=2)
+        self.display.blit(t, (bx + 20, FIELD_Y + FIELD_H // 2 - t.get_height() // 2))
+
+    def _draw_overlay(self, title, lines):
+        ox = WIDTH // 4
+        oy = HEIGHT // 4
+        ow = WIDTH // 2
+        oh = HEIGHT // 2
+        rrect(self.display, PANEL2, pygame.Rect(ox, oy, ow, oh), r=12)
+        rrect(self.display, BORDER, pygame.Rect(ox, oy, ow, oh), r=12, bw=1)
+        tl = self.fonts["title"].render(title, True, WHITE)
+        self.display.blit(tl, (ox + ow // 2 - tl.get_width() // 2, oy + 16))
+        for i, line in enumerate(lines[-18:]):
+            lt = self.fonts["small"].render(line, True, MUTED)
+            self.display.blit(lt, (ox + 20, oy + 52 + i * 22))
+
+    def _draw_sidebar(self):
+        sx = SIDEBAR_X
+        sw = WIDTH - sx
+        panel(self.display, pygame.Rect(sx - 8, 0, sw + 8, HEIGHT), r=0)
+
+        self._txt("Card Duel", sx + 6, 18, WHITE, "title")
+        phase_col = {
+            "draw": TEAL, "main": BLUE, "battle": RED, "end": AMBER
+        }.get(self.phase, MUTED)
+        self._txt(self.phase.upper(), sx + 6, 54, phase_col, "small")
+        pygame.draw.line(self.display, BORDER, (sx, 78), (WIDTH - 4, 78), 1)
+
+        cy       = 88
+        prev_w   = sw - 20
+
+        # Card preview
+        cy = self.preview.draw(sx + 6, cy, prev_w)
+
+        # Controls
+        controls = [
+            ("ESC", "Main menu"),
+            ("E",   "End turn"),
+            ("D",   "Draw card"),
+            ("R",   "Reset field"),
+            ("H",   "History log"),
+            ("G",   "Graveyard"),
+            ("B",   "Banished"),
+        ]
+        for key, desc in controls:
+            if cy + 28 > HEIGHT - 10: break
+            kr = pygame.Rect(sx + 6, cy, 26, 20)
+            rrect(self.display, (32, 44, 62), kr, r=4)
+            ks = self.fonts["small"].render(key, True, BLUE)
+            self.display.blit(ks, (kr.centerx - ks.get_width() // 2, kr.y + 2))
+            self._txt(desc, sx + 38, cy + 2, MUTED, "small")
+            cy += 28
+
+        pygame.draw.line(self.display, BORDER, (sx, cy + 2), (WIDTH - 4, cy + 2), 1)
+        cy += 10
+
+        hints = [("Dbl-click", "play card"), ("Drag", "play to field")]
+        for lbl, act in hints:
+            if cy + 22 > HEIGHT - 10: break
+            self._txt(f"{lbl} → {act}", sx + 6, cy, DIM, "small")
+            cy += 22
+
+        pygame.draw.line(self.display, BORDER, (sx, cy + 2), (WIDTH - 4, cy + 2), 1)
+        cy += 10
+
+        stats = [
+            ("Player HP", self.player_hp),
+            ("Enemy HP",  self.enemy_hp),
+            ("Deck left", len(self.player_deck)),
+            ("Hand",      len(self.player_hand)),
+            ("Graveyard", len(self.player_graveyard)),
+        ]
+        for lbl, val in stats:
+            if cy + 20 > HEIGHT - 10: break
+            col = RED if lbl == "Enemy HP" and self.enemy_hp <= 5 else \
+                  GREEN if lbl == "Player HP" and self.player_hp > 10 else MUTED
+            self._txt(f"{lbl}  {val}", sx + 6, cy, col, "small")
+            cy += 20
+
+        if self.status and cy + 10 < HEIGHT:
+            pygame.draw.line(self.display, BORDER, (sx, cy + 2), (WIDTH - 4, cy + 2), 1)
+            cy += 10
+            col = (GREEN if any(w in self.status for w in ("Wins","Drew","Played"))
+                   else RED   if any(w in self.status for w in ("full","Empty","Wins Enemy"))
+                   else WHITE)
+            self._txt(self.status, sx + 6, cy, col, "normal")
+
+    def _draw_drag_ghost(self):
+        if not self.dragging or not self.drag_card_name:
+            return
+        cd = CARD_BY_NAME.get(self.drag_card_name)
+        dx = self.drag_pos[0] - CARD_W // 2
+        dy = self.drag_pos[1] - CARD_H // 2
+        ghost = pygame.Surface((CARD_W, CARD_H), pygame.SRCALPHA)
+        pygame.draw.rect(ghost, (*BLUE, 150), (0, 0, CARD_W, CARD_H), border_radius=7)
+        pygame.draw.rect(ghost, (*WHITE, 200), (0, 0, CARD_W, CARD_H), 1, border_radius=7)
+        self.display.blit(ghost, (dx, dy))
+        if cd:
+            img = load_img(cd["image"], CARD_W - 8, CARD_H - 28)
+            self.display.blit(img, (dx + 4, dy + 4))
+        ns = self.fonts["small"].render(self.drag_card_name, True, WHITE)
+        self.display.blit(ns, (dx + CARD_W // 2 - ns.get_width() // 2, dy + CARD_H - 18))
+
+    def draw(self):
+        self.tick_status()
+        self.display.fill(BG)
+
+        self._draw_header()
+        self._draw_hp_bars()
+        self._draw_field()
+        self._draw_enemy_hand()
+        self._draw_zones()
+        self._draw_hand()
+        self._draw_buttons()
+        self._draw_result_banner()
+        self._draw_sidebar()
+        self._draw_drag_ghost()
+
+        # Overlays (history / graveyard / banished)
+        if self.show_history:
+            self._draw_overlay("History Log", self.history_log)
+        elif self.show_graveyard:
+            items = [f"{i+1}. {n}" for i, n in enumerate(self.player_graveyard)] or ["(empty)"]
+            self._draw_overlay("Player Graveyard", items)
+        elif self.show_banished:
+            items = [f"{i+1}. {n}" for i, n in enumerate(self.player_banished)] or ["(empty)"]
+            self._draw_overlay("Player Banished", items)
 
 
-enemy_card_back = card.card("Card", card_back_img, 1050, 390)
-enemy_card_back2 = card.card("Card", card_back_img, 850, 390)
-def show_enemy_field():
-    screen.blit(enemy_card_back.image, (1050, 390))
-
-    screen.blit(enemy_card_back2.image, (850, 390)) 
-
-def get_img(string):
-    if string == "Rock":
-        return rock_img
-    if string == "Paper":
-        return paper_img
-    if string == "Scissors":
-        return scissors_img
-    
-def reset_player_field():
-    global player_field
-    global list_player_choice
-    player_field = []
-    list_player_choice = []
-    
-
-
-def show_player_field():
-
-    if len(player_field) != 0:
-        screen.blit(get_img(player_field[0]), (850, 600))
-        if len(player_field) >= 2:
-            screen.blit(get_img(player_field[1]), (1050, 600))
-
-
-global b_show_history_log 
-b_show_history_log = False
-
-def show_history_log():    
-    if b_show_history_log == True:
-        pygame.draw.rect(screen, DARK_GREY, ( WIDTH/4, HEIGHT/3.5, WIDTH /1.8, HEIGHT / 2))
-        display_text(f"History Log", GREY, WIDTH / 2 - 50, HEIGHT / 3)
-        display_text(f"0. Round 1 Start", GREY, WIDTH / 3 - 50, HEIGHT / 2.8)
-        display_text(f"1. Player 1 Draws 5 Cards", GREY, WIDTH / 3 - 50, HEIGHT / 2.6)
-        display_text(f"2. Player 2 Draws 5 Cards", GREY, WIDTH / 3 - 50, HEIGHT / 2.4)
-        display_text(f"3. Player 2 Ends their turn", GREY, WIDTH / 3 - 50, HEIGHT / 2.2)
-
-
-
-global b_show_graveyard 
-b_show_graveyard = False
-def show_player_graveyard():    
-    if b_show_graveyard == True:
-        pygame.draw.rect(screen, DARK_GREY, ( WIDTH/4, HEIGHT/3.5, WIDTH /1.8, HEIGHT / 2))
-        display_text(f"Player Graveyard", BLUE, WIDTH / 2 - 50, HEIGHT / 3)
-        display_text(f"Empty Card", GREY, WIDTH / 3 - 50, HEIGHT / 2.8)
-        display_text(f"Empty Card", GREY, WIDTH / 3 - 50, HEIGHT / 2.6)
-        display_text(f"Empty Card", GREY, WIDTH / 3 - 50, HEIGHT / 2.4)
-        display_text(f"Empty Card", GREY, WIDTH / 3 - 50, HEIGHT / 2.2)
-
-
-global b_show_banished 
-b_show_banished = False
-def show_player_banished():    
-    if b_show_banished == True:
-        pygame.draw.rect(screen, DARK_GREY, ( WIDTH/4, HEIGHT/3.5, WIDTH /1.8, HEIGHT / 2))
-        display_text(f"Player Banished", BLUE, WIDTH / 2 - 50, HEIGHT / 3)
-        display_text(f"Empty Card", GREY, WIDTH / 3 - 50, HEIGHT / 2.8)
-        display_text(f"Empty Card", GREY, WIDTH / 3 - 50, HEIGHT / 2.6)
-        display_text(f"Empty Card", GREY, WIDTH / 3 - 50, HEIGHT / 2.4)
-        display_text(f"Empty Card", GREY, WIDTH / 3 - 50, HEIGHT / 2.2)
-
-
-global b_is_end_turn
-b_is_end_turn = True
-
-clock = pygame.time.Clock()
-
-# For double-click detection
-DOUBLE_CLICK_TIME = 400  # milliseconds
-last_click_time = 0
-
-
-# Main game loop
+# ═════════════════════════════════════════════════════════════════════
+# Entry point
+# ═════════════════════════════════════════════════════════════════════
 def main():
-    global player_field
-    global list_player_choice
+    pygame.init()
+    screen = pygame.display.set_mode((WIDTH, HEIGHT))
+    pygame.display.set_caption("Card Duel")
+    clock  = pygame.time.Clock()
+    game   = Game(screen)
 
-    global b_show_history_log, b_show_banished, b_show_graveyard, b_is_end_turn, result, last_click_time
-    b_show_history_log = False
-    b_show_graveyard = False
-    b_show_banished = False
     running = True
-    list_player_choice = []
-    player_choice = None
-    player_select_choice = None
-    computer_choice = None
-    result = None
-    held_card_in_field = False
-
-
-
-
-
-    def end_turn():
-        global result
-        computer_choice = random.choice(choices)
-        computer_choice2 = random.choice(choices)
-
-        # computer card flips
-        if computer_choice == 'Rock':
-            enemy_card_back.flip_card(card_rock.image, screen)
-        if computer_choice2 == 'Rock':
-            enemy_card_back2.flip_card(card_rock.image, screen)
-        if computer_choice == 'Paper':
-            enemy_card_back.flip_card(card_paper.image, screen)
-        if computer_choice2 == 'Paper':
-            enemy_card_back2.flip_card(card_paper.image, screen)
-        if computer_choice == 'Scissors':
-            enemy_card_back.flip_card(card_scissors.image, screen)
-        if computer_choice2 == 'Scissors':
-            enemy_card_back2.flip_card(card_scissors.image, screen)
-
-
-
-        result = 'Undetermined'
-        result01 = 'False'
-        result02 = 'False'
-        result03 = 'False'
-        result04 = 'False'
-        result1 = 'False'
-        result2 = 'False'
-        result3 = 'False'
-
-        if len(player_field) == 0:
-            result = 'Computer Wins'
-
-        if len(player_field) != 0:
-            result0 = determine_winner(player_field[0], computer_choice)
-            result1 = determine_winner(player_field[0], computer_choice2)
-            
-            result2 = determine_winner(player_field[1], computer_choice2)
-            result3 = determine_winner(player_field[1], computer_choice)
-
-        if result == 'Player Wins' and result1 == 'Player Wins':
-            result01 = 'Player Wins'
-        elif result2 == 'Player Wins' and result3 == 'Player Wins':
-            result02 = 'Player Wins'
-
-        if result01 == 'Player Wins' and result02 == 'Player Wins':
-            result = 'Player Wins'
-
-        if result == 'Draw' and result1 == 'Draw':
-            result01 = 'Draw'
-        elif result2 == 'Draw' and result3 == 'Draw':
-            result02 = 'Draw'
-        
-        if result == 'Player Wins' and result1 == 'Computer Wins':
-            result01 = 'Player Wins 1'
-        if result1 == 'Player Wins' and result == 'Computer Wins':
-            result02 = 'Player Wins 2'
-        if result2 == 'Player Wins' and result3 == 'Computer Wins':
-            result03 = 'Player Wins 3'
-        if result3 == 'Player Wins' and result2 == 'Computer Wins':
-            result04 = 'Player Wins 4'
-        
-
-        # Determine the final result based on all outcomes
-        if result01 == 'Player Wins' or result02 == 'Player Wins' or result03 == 'Player Wins' or result04 == 'Player Wins':
-            result = 'Player Wins'
-        elif result01 == 'Draw' or result02 == 'Draw':
-            result = 'Draw'
-        elif result01 == 'Computer Wins' or result02 == 'Computer Wins' or result03 == 'Computer Wins' or result04 == 'Computer Wins':
-            result = 'Computer Wins'
-        else:
-            result = 'Undetermined'
-
-        
-        
-        
-        
-
-
-    
-
     while running:
-        screen.fill(BLACK)
-        
-        # Game UI
-        
-        
-        display_text(f"Round: 1", GREY, 50, 850)
-        display_text(f"History Log", BLUE, 50, 900)
-        display_text(f"Player Health: 10", RED, 50, 1000)
-        display_text(f"Player: {list_player_choice} {player_field} {player_choice}", BLUE, 50, 800)
-        
-        display_text(f"Enemy: {computer_choice}", RED, 50, 600)
-        display_text(f"Enemy Health: 10", RED, 50, 500)
-        num_player_deck = len(player_deck)
-        display_text(f"result: {result}", GREEN, 50, 700)
-        if result:
-            display_text(result, GREEN, 450, 700)
-
-        # Inside game loop
-        deck.draw_deck_image(screen, font_small, text_color=LIGHT_BLUE)
-        graveyard.draw_image(screen, font_small, text_color=LIGHT_BLUE)
-        banished.draw_image(screen, font_small, text_color=LIGHT_BLUE)
-        enemy_deck.draw_deck_image(screen, font_small, text_color=LIGHT_RED)
-        enemy_graveyard.draw_image(screen, font_small, text_color=LIGHT_RED)
-        enemy_banished.draw_image(screen, font_small, text_color=LIGHT_RED)
-
-        display_text("Choose: Rock, Paper, or Scissors", BLACK, 150, 50)
-
-        # Draw a grey rectangle menu bar at the top
-        pygame.draw.rect(screen, DARK_GREY, (0, 0, WIDTH, 50))
-
-        display_text(f"One Round Game", GREY, 860, 4)
-        display_text(f"Menu", GREY, 50, 4)    # U+2302
-
-
-
-
-
-        # enemy hand of cards
-        screen.blit(card_back_img, (650, 150))
-        screen.blit(card_back_img, (850, 150))
-        screen.blit(card_back_img, (1050, 150))
-
-
-        
-
-        # playing field
-        pygame.draw.rect(screen, GREY, (WIDTH / 2 - 350, HEIGHT/2 - 180, 800, 420))
-        if held_card_in_field == True:
-            pygame.draw.rect(screen, GREEN, (WIDTH / 2 - 350, HEIGHT/2 - 180, 800, 420))
-
-        pygame.draw.rect(screen, BLACK, (WIDTH / 2 - 330, HEIGHT/2 - 160, 750, 380))
-
-        screen.blit(card_info_img, (1550, 100))  #card info
-        
-        show_player_field()
-        show_enemy_field()
-        show_hand_of_cards()
-        show_player_graveyard()
-        show_player_banished()
-        show_history_log()
-
-        
-
-        
-        if b_is_end_turn == True:
-            display_text(f"End turn", BLUE, 1650, 1000)
-        elif True:
-            display_text(f"Draw Cards", BLUE, 1650, 1000)
-            
-    
-        
-            
-
-        for event in pygame.event.get():
-            card_rock.handle_event(event)
-            card_paper.handle_event(event)
-            card_scissors.handle_event(event)
-            if event.type in (pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP, pygame.MOUSEMOTION):
-                # Pass the event to each card in the hand
-                for card_obj in card_objs:
-                    card_obj.handle_event(event)
-
-            if event.type == pygame.QUIT:
-                running = False
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    running = False
-                    import cardgame  # Import the cardgame module
-                    cardgame.main()
-                if event.key == pygame.K_d:
-                    screen.blit(card_back_img, (1600, 800))
-                if event.key == pygame.K_h:
-                    b_show_history_log = not b_show_history_log
-                if event.key == pygame.K_g:
-                    b_show_graveyard = not b_show_graveyard 
-                if event.key == pygame.K_b:
-                    b_show_banished = not b_show_banished
-                if event.key == pygame.K_r:
-                    reset_player_field()
-                if event.key == pygame.K_e: # and enter?
-                    b_is_end_turn = not b_is_end_turn
-                    end_turn()
-
-            elif event.type == pygame.MOUSEMOTION:
-                x, y = event.pos
-                if WIDTH / 2 - 350 <= x <= WIDTH / 2 + 450 and HEIGHT / 2 - 180 <= y <= HEIGHT / 2 + 240:
-                    held_card_in_field = True
-                else:
-                    held_card_in_field = False
-                
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                x, y = event.pos
-                current_time = pygame.time.get_ticks()
-                if card_rock.x <= x <= card_rock.x + 100 and card_rock.y <= y <= card_rock.y +100:
-                    player_choice = "Rock"
-                if card_paper.x <= x <= card_paper.x + 100 and card_paper.y <= y <= card_paper.y +100:
-                    player_choice = "Paper"
-                if card_scissors.x <= x <= card_scissors.x + 100 and card_scissors.y <= y <= card_scissors.y +100:
-                    player_choice = "Scissors"
-
-                if current_time - last_click_time <= DOUBLE_CLICK_TIME:
-                    print("Double Click Detected!")
-                    # double tap to add (650 + i * 200, 850)
-                    if card_rock.x <= x <= card_rock.x + 100 and card_rock.y <= y <= card_rock.y +100:
-                        player_choice = "Rock"
-                        list_player_choice.append("Rock")
-                        player_field.append("Rock")
-                    elif 850 <= x <= 1000 and 850 <= y <= 1000:
-                        player_choice = "Paper"
-                        list_player_choice.append("Paper")
-                        player_field.append("Paper")
-                    elif 1050 <= x <= 1200 and 850 <= y <= 1000:
-                        player_choice = "Scissors"
-                        list_player_choice.append("Scissors")
-                        player_field.append("Scissors")
-                    if 100 <= x <= 250 and 400 <= y <= 550:
-                        player_choice = "Rock"
-                    elif 325 <= x <= 475 and 400 <= y <= 550:
-                        player_choice = "Paper"
-                    elif 550 <= x <= 700 and 400 <= y <= 550:
-                        player_choice = "Scissors"
-                    
-
-                last_click_time = current_time
-
-            if event.type == pygame.MOUSEBUTTONUP:
-                x, y = event.pos
-                if player_choice == "Rock":
-                    if WIDTH / 2 - 350 <= x <= WIDTH / 2 + 450 and HEIGHT / 2 - 180 <= y <= HEIGHT / 2 + 240:
-                        player_field.append("Rock")
-                        hand.remove("Rock")
-                if player_choice == "Scissors":
-                    if WIDTH / 2 - 350 <= x <= WIDTH / 2 + 450 and HEIGHT / 2 - 180 <= y <= HEIGHT / 2 + 240:
-                        player_field.append("Scissors")
-                        hand.remove("Scissors")
-                if player_choice == "Paper":
-                    if WIDTH / 2 - 350 <= x <= WIDTH / 2 + 450 and HEIGHT / 2 - 180 <= y <= HEIGHT / 2 + 240:
-                        player_field.append("Paper")
-                        hand.remove("Paper")
-                
-
-
+        running = game.handle_events()
+        game.draw()
         pygame.display.flip()
         clock.tick(60)
 
     pygame.quit()
+
 
 if __name__ == "__main__":
     main()
