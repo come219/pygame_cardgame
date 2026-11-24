@@ -349,17 +349,18 @@ ALL_CARDS = [
     {"name": "The Hierophant",    "value": 0, "image": "assets/cards/tarot/card_05_the_hierophant.png",    "category": "Tarot", "desc": "VI - The Hierophant. Symbolizes tradition, conformity, and spiritual guidance."},
     {"name": "The Lovers",        "value": 0, "image": "assets/cards/tarot/card_06_the_lovers.png",       "category": "Tarot", "desc": "VII - The Lovers. Represents love, harmony, and choices."},
     {"name": "The Chariot",       "value": 0, "image": "assets/cards/tarot/card_07_the_chariot.png",      "category": "Tarot", "desc": "VIII - The Chariot. Symbolizes victory, determination, and willpower."},
-    {"name": "Strength",          "value": 0, "image": "assets/cards/tarot/card_08_the_strength.png",     "category": "Tarot", "desc": "VIV - Strength. Represents courage, patience, and inner strength."},
-    {"name": "The Hermit",        "value": 0, "image": "assets/cards/tarot/card_09_the_hermit.png",       "category": "Tarot", "desc": "IX - The Hermit. Symbolizes introspection, solitude, and guidance."},
-    {"name": "Justice",           "value": 0, "image": "assets/cards/tarot/card_11_justice.png",      "category": "Tarot", "desc": "Justice. Symbolizes fairness, truth, and law."},
-    {"name": "The Hanged Man",    "value": 0, "image": "assets/cards/tarot/card_12_the_hanged_man.png", "category": "Tarot", "desc": "The Hanged Man. Represents suspension, letting go, and new perspectives."},
-    {"name": "Death",             "value": 0, "image": "assets/cards/tarot/card_13_death.png",           "category": "Tarot", "desc": "Death. Symbolizes transformation, endings, and new beginnings."},
-    {"name": "Temperance",        "value": 0, "image": "assets/cards/tarot/card_14_temperance.png",      "category": "Tarot", "desc": "Temperance. Represents balance, moderation, and harmony."},
-    {"name": "The Devil",         "value": 0, "image": "assets/cards/tarot/card_15_the_devil.png",       "category": "Tarot", "desc": "The Devil. Symbolizes temptation, materialism, and bondage."},
-    {"name": "The Tower",         "value": 0, "image": "assets/cards/tarot/card_16_the_tower.png",       "category": "Tarot", "desc": "The Tower. Represents sudden change, upheaval, and revelation."},
-    {"name": "The Star",          "value": 0, "image": "assets/cards/tarot/card_17_the_star.png",        "category": "Tarot", "desc": "The Star. Symbolizes hope, inspiration, and serenity."},
-    {"name": "The Moon",          "value": 0, "image": "assets/cards/tarot/card_18_the_moon.png",        "category": "Tarot", "desc": "The Moon. Represents illusion, fear, and the subconscious."},
-    {"name": "The Sun",           "value": 0, "image": "assets/cards/tarot/card_19_the_sun.png",         "category": "Tarot", "desc": "The Sun. Symbolizes positivity, success, and vitality."},
+    {"name": "Strength",          "value": 0, "image": "assets/cards/tarot/card_08_the_strength.png",     "category": "Tarot", "desc": "IX - Strength. Represents courage, patience, and inner strength."},
+    {"name": "The Hermit",        "value": 0, "image": "assets/cards/tarot/card_09_the_hermit.png",       "category": "Tarot", "desc": "X - The Hermit. Symbolizes introspection, solitude, and guidance."},
+    {"name": "Wheel of Fortune",  "value": 0, "image": "assets/cards/tarot/card_10_wheel_of_fortune.png", "category": "Tarot", "desc": "XI - Wheel of Fortune. Represents change, cycles, and fate."},
+    {"name": "Justice",           "value": 0, "image": "assets/cards/tarot/card_11_justice.png",      "category": "Tarot", "desc": "XII -Justice. Symbolizes fairness, truth, and law."},
+    {"name": "The Hanged Man",    "value": 0, "image": "assets/cards/tarot/card_12_the_hanged_man.png", "category": "Tarot", "desc": "XIII -The Hanged Man. Represents suspension, letting go, and new perspectives."},
+    {"name": "Death",             "value": 0, "image": "assets/cards/tarot/card_13_death.png",           "category": "Tarot", "desc": "XIV - Death. Symbolizes transformation, endings, and new beginnings."},
+    {"name": "Temperance",        "value": 0, "image": "assets/cards/tarot/card_14_temperance.png",      "category": "Tarot", "desc": "XV - Temperance. Represents balance, moderation, and harmony."},
+    {"name": "The Devil",         "value": 0, "image": "assets/cards/tarot/card_15_the_devil.png",       "category": "Tarot", "desc": "XVI -The Devil. Symbolizes temptation, materialism, and bondage."},
+    {"name": "The Tower",         "value": 0, "image": "assets/cards/tarot/card_16_the_tower.png",       "category": "Tarot", "desc": "XVII - The Tower. Represents sudden change, upheaval, and revelation."},
+    {"name": "The Star",          "value": 0, "image": "assets/cards/tarot/card_17_the_star.png",        "category": "Tarot", "desc": "XVIII - The Star. Symbolizes hope, inspiration, and serenity."},
+    {"name": "The Moon",          "value": 0, "image": "assets/cards/tarot/card_18_the_moon.png",        "category": "Tarot", "desc": "XIX - The Moon. Represents illusion, fear, and the subconscious."},
+    {"name": "The Sun",           "value": 0, "image": "assets/cards/tarot/card_19_the_sun.png",         "category": "Tarot", "desc": "XThe Sun. Symbolizes positivity, success, and vitality."},
     {"name": "Judgement",         "value": 0, "image": "assets/cards/tarot/card_20_judgement.png",       "category": "Tarot", "desc": "Judgement. Represents rebirth, inner calling, and absolution."},
     {"name": "The World",         "value": 0, "image": "assets/cards/tarot/card_21_the_world.png",       "category": "Tarot", "desc": "The World. Symbolizes completion, integration, and accomplishment."},
     
@@ -487,11 +488,18 @@ ALL_CARDS = [
     {"name": "Grunt",           "value": 0, "image": "assets/card_grunt.png",            "category": "Units", "desc": "A basic but fierce orc warrior. Fights with raw aggression."},
     {"name": "Burrow",          "value": 0, "image": "assets/card_burrow.png",           "category": "Units", "desc": "An underground hideout. Conceals units and enables surprise attacks."},
     {"name": "Ghoul",           "value": 0, "image": "assets/card_ghoul.png",            "category": "Units", "desc": "An undead scavenger. Regenerates health by consuming fallen foes."},
+    {"name": "Ziggurat",           "value": 0, "image": "assets/card_ghoul.png",            "category": "Units", "desc": "An undead scavenger. Regenerates health by consuming fallen foes."},
+    
+    
+    
     {"name": "Blue Eyes Dragon","value": 0,"image": "assets/card_blue_eyes_white_dragon.png","category": "Units", "desc": "The legendary Blue-Eyes White Dragon. Devastating burst stream of destruction."},
     {"name": "Red Eyes Dragon", "value": 0, "image": "assets/card_red_eyes_black_dragon.png", "category": "Units", "desc": "The fierce Red-Eyes Black Dragon. Inferno fire blast incinerates all."},
     {"name": "Moon Champion",   "value": 0, "image": "assets/card_moon_champion.png",    "category": "Units", "desc": "A warrior empowered by moonlight. Grows stronger as night falls."},
     {"name": "Lunar Soldier",   "value": 0, "image": "assets/card_soldier_of_lunar_light.png","category": "Units", "desc": "A soldier blessed by the moon. Fights with ethereal lunar energy."},
     {"name": "Void Bard",       "value": 0, "image": "assets/card_void_bard.png",        "category": "Units", "desc": "A musician of the void. Plays haunting melodies that weaken enemies."},
+    
+    
+    
     # --- Spells / Traps ---
     {"name": "Trap Stun",       "value": 0, "image": "assets/card_trap_stun.png",        "category": "Spells", "desc": "Negates all trap cards for this turn. Clears the way for your play."},
     {"name": "Barbed Armour",   "value": 0, "image": "assets/card_barbed_armour.png",    "category": "Spells", "desc": "Reflects a portion of damage back to the attacker. Punishes aggression."},
@@ -501,6 +509,8 @@ ALL_CARDS = [
     {"name": "Greater Axe",     "value": 0, "image": "assets/greater_axe_card.png",      "category": "Spells", "desc": "A massive enchanted axe. Boosts attack power significantly."},
     {"name": "Black Hole",      "value": 0, "image": "assets/blackhole_card.png",        "category": "Spells", "desc": "Destroys all cards on the field. A devastating reset for both sides."},
     {"name": "Mystical Typhoon","value": 0,"image": "assets/mysticalspacetypoon_card.png","category": "Spells", "desc": "Destroys one spell or trap card on the field. Precise removal."},
+    
+    
     # --- AA (Action Arena) ---
     {"name": "AA Shoot",        "value": 0, "image": "assets/card_aa_shoot.png",         "category": "AA", "desc": "Fire your weapon in the Action Arena. Deals direct damage."},
     {"name": "AA Reload",       "value": 0, "image": "assets/card_aa_reload.png",        "category": "AA", "desc": "Reload your ammunition. Required before you can shoot again."},
@@ -512,6 +522,17 @@ ALL_CARDS = [
     {"name": "AA Reflect Shot", "value": 0, "image": "assets/card_aa_reflect_shot.png",  "category": "AA", "desc": "Reflects an incoming shot back at the attacker. Risky but rewarding."},
     {"name": "AA Extra Heart",  "value": 0, "image": "assets/card_aa_extra_heart.png",   "category": "AA", "desc": "Grants one additional life point. Extends your survival in the arena."},
     {"name": "AA Reset",        "value": 0, "image": "assets/card_aa_reset_players.png", "category": "AA", "desc": "Resets both players to their starting state. A full arena restart."},
+
+
+
+
+
+
+
+
+
+
+
 ]
 
 
